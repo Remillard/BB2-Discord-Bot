@@ -1,0 +1,29 @@
+%YAML 1.2
+---
+num_teams: 2
+teams:
+  team_1:
+    name: K-Tel Records - The 80s
+    race: Norse
+    coach_name: Remillard
+    dtag: Remi#2160
+  team_2:
+    name: Doomeriffic
+    race: Norse
+    coach_name: DarkHammish
+    dtag: Hammish#1754
+
+schedule:
+  week_1:
+    game_1:
+      home: team_1
+      away: team_2
+    game_2:
+      home: team_3
+      away: team_4
+    game_3:
+      home: team_5
+      away: team_6
+
+
+
