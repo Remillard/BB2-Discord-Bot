@@ -2,7 +2,7 @@
 """
 Data Structures for dealing with Blood Bowl 2 Teams
 """
-import argparse
+import click
 from ruamel.yaml import YAML
 
 class Team():
