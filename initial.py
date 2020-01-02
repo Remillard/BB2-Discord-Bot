@@ -2,7 +2,7 @@
 """
 Data Structures for dealing with Blood Bowl 2 Teams
 """
-import click
+import argparse
 from ruamel.yaml import YAML
 
 class Team():
@@ -22,8 +22,8 @@ class Team():
 
 def main():
     """Main command line entry point"""
-    #parser.argparse.ArgumentParser(prog="bb2_teams", description="More here later")
-    #parser.add_argument()
+    parser.argparse.ArgumentParser(prog="bb2_teams", description="More here later")
+    parser.add_argument()
 
     yaml = YAML()
     tfile = open("sample_tourney.yaml")
