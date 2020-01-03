@@ -1,12 +1,14 @@
 #! python3
+"""This module implements classes and methods for manipulating Blood Bowl 2
+team names and league schedules in order to facilitate command line operation
+and a Discord Bot API in the future."""
 import sys
-import os.path
-from os import path
 import argparse
 import yaml
 
 ################################################################################
 class TourneyYAML:
+    """Class encapculations interactions with the YAML file"""
     def __init__(self, filename):
         self.filename = filename
 
@@ -22,6 +24,8 @@ class TourneyYAML:
 
 ################################################################################
 class Team:
+    """Class encapsulates team data as well as multiple methods for
+    constructing the object from different sources."""
     def __init__(self, name, race, coach, dtag):
         self.name = name
         self.race = race
@@ -38,20 +42,19 @@ class Team:
     @classmethod
     def from_str(cls, team_str):
         team_list = team_str.split(",")
-        if team_list[2].lstrip() != "AI":
-            return cls(
-                team_list[0].lstrip(),
-                team_list[1].lstrip(),
-                team_list[2].lstrip(),
-                team_list[3].lstrip(),
-            )
-        else:
+        if team_list[2].lstrip() == "AI":
             return cls(
                 team_list[0].lstrip(),
                 team_list[1].lstrip(),
                 team_list[2].lstrip(),
                 "None",
             )
+        return cls(
+            team_list[0].lstrip(),
+            team_list[1].lstrip(),
+            team_list[2].lstrip(),
+            team_list[3].lstrip(),
+        )
 
     @property
     def to_dict(self):
@@ -63,11 +66,35 @@ class Team:
         }
 
 
-################################################################################
 class League(list):
+    """A customized list class encapsulating specific method for constructing
+    the class out of a dictionary and Team objects.  May have additional
+    custom methods later."""
     def __init__(self, teams_dict):
+        super().__init__()
         for team_dict in teams_dict:
             self.append(Team.from_dict(team_dict))
+
+
+################################################################################
+class Game:
+    def __init__(self, team_nums, league):
+        self.home = league[team_nums[0]]
+        self.away = league[team_nums[1]]
+
+
+class Week(list):
+    def __init__(self, game_list, league):
+        super().__init__()
+        for game in game_list:
+            self.append(Game(game, league))
+
+
+class Schedule(list):
+    def __init__(self, schedule_dict, league):
+        super().__init__()
+        for week in schedule_dict:
+            self.append(Week(schedule_dict[week], league))
 
 
 ################################################################################
@@ -86,15 +113,16 @@ def report_teams(tfile):
 def report_schedule(tfile):
     blob = tfile.read()
     league = League(blob["teams"])
-    print(f"Number of weeks in the schedule: {blob['num_weeks']}")
-    for idx, week in enumerate(blob["schedule"]):
+    schedule = Schedule(blob["schedule"], league)
+    print(f"Number of weeks in the schedule: {len(schedule)}")
+    for idx, week in enumerate(schedule):
         print(f"-- Week #{idx} ---------------------------")
-        for game in blob["schedule"][week]:
-            print(f"Home: {teams[game[0]].name:40} Away: {teams[game[1]].name:40}")
+        for game in week:
+            print(f"Home: {game.home.name:40} Away: {game.away.name:40}")
 
 
 def create_tfile(tfile):
-    blob = {"num_teams": 0, "num_weeks": 0, "teams": None, "schedule": None}
+    blob = {"num_weeks": 0, "teams": None, "schedule": None}
     tfile.write(blob)
 
 
@@ -144,7 +172,9 @@ def main():
     )
     parser.add_argument(
         "--del_team",
-        help="Removes a team from the list.  Team should be specified by team name.  If there are spaces in the name, please surround the name with quotes.",
+        help='''Removes a team from the list.  Team should be specified by
+        team name.  If there are spaces in the name, please surround the name
+        with quotes.''',
     )
     parser.add_argument(
         "--report",
