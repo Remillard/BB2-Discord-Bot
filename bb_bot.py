@@ -64,14 +64,19 @@ class Team:
 
 class League:
     def __init__(self, teams_dict):
+        self.teams = []
         for team_dict in teams_dict:
-            self.teams = []
             self.teams.append(Team.from_dict(team_dict))
 
     def __iter__(self):
         return LeagueIterator(self)
 
-class LeagueIterator():
+    @property
+    def size(self):
+        return len(self.teams)
+
+
+class LeagueIterator:
     def __init__(self, league):
         self.league = league
         self.index = 0
@@ -86,8 +91,8 @@ class LeagueIterator():
 
 def report_teams(tfile):
     blob = tfile.read()
-    print(f"Number of teams: {blob['num_teams']}")
     league = League(blob["teams"])
+    print(f"Number of teams: {league.size}")
     for idx, team in enumerate(league):
         print(f"-- Team #{idx} ---------------------------")
         print(f"Team Name: {team.name}")
@@ -98,7 +103,7 @@ def report_teams(tfile):
 
 def report_schedule(tfile):
     blob = tfile.read()
-    teams = Teams(blob["teams"])
+    league = League(blob["teams"])
     print(f"Number of weeks in the schedule: {blob['num_weeks']}")
     for idx, week in enumerate(blob["schedule"]):
         print(f"-- Week #{idx} ---------------------------")
