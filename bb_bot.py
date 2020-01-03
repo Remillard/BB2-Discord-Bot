@@ -5,7 +5,7 @@ from os import path
 import argparse
 import yaml
 
-
+################################################################################
 class TourneyYAML:
     def __init__(self, filename):
         self.filename = filename
@@ -20,6 +20,7 @@ class TourneyYAML:
             yaml.dump(blob, f)
 
 
+################################################################################
 class Team:
     def __init__(self, name, race, coach, dtag):
         self.name = name
@@ -62,37 +63,18 @@ class Team:
         }
 
 
-class League:
+################################################################################
+class League(list):
     def __init__(self, teams_dict):
-        self.teams = []
         for team_dict in teams_dict:
-            self.teams.append(Team.from_dict(team_dict))
-
-    def __iter__(self):
-        return LeagueIterator(self)
-
-    @property
-    def size(self):
-        return len(self.teams)
+            self.append(Team.from_dict(team_dict))
 
 
-class LeagueIterator:
-    def __init__(self, league):
-        self.league = league
-        self.index = 0
-
-    def __next__(self):
-        if self.index < len(self.league.teams):
-            result = self.league.teams[self.index]
-            self.index += 1
-            return result
-        raise StopIteration
-
-
+################################################################################
 def report_teams(tfile):
     blob = tfile.read()
     league = League(blob["teams"])
-    print(f"Number of teams: {league.size}")
+    print(f"Number of teams: {len(league)}")
     for idx, team in enumerate(league):
         print(f"-- Team #{idx} ---------------------------")
         print(f"Team Name: {team.name}")
@@ -139,6 +121,7 @@ def del_team(tfile, team_name):
         print(f"Team {team_name} not found!")
 
 
+################################################################################
 def main():
     parser = argparse.ArgumentParser(
         prog="bb2_bot",
@@ -191,5 +174,6 @@ def main():
         report_schedule(tfile)
 
 
+################################################################################
 if __name__ == "__main__":
     main()
