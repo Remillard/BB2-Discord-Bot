@@ -1,30 +1,25 @@
-%YAML 1.2
----
-num_teams: 2
-
-teams:
-  team_0:
-    name: K-Tel Records - The 80s
-    race: Norse
-    coach_name: Remillard
-    dtag: Remi#2160
-  team_1:
-    name: Doomeriffic
-    race: Norse
-    coach_name: DarkHammish
-    dtag: Hammish#1754
-
+num_teams: 3
 schedule:
   week_0:
     game_0:
-      home: team_0
       away: team_1
+      home: team_0
     game_1:
-      home: team_2
       away: team_3
+      home: team_2
     game_2:
-      home: team_4
       away: team_5
-
-
-
+      home: team_4
+teams:
+- coach: Remillard
+  dtag: Remi#2160
+  name: K-Tel Records - The 80s
+  race: Norse
+- coach: DarkHammish
+  dtag: Hammish#1754
+  name: Doomeriffic
+  race: Norse
+- coach: John Doe
+  dtag: JDoe#9999
+  name: Super Joes
+  race: Khemri
