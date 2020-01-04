@@ -7,25 +7,10 @@ import argparse
 import yaml
 
 ################################################################################
-class TourneyYAML:
-    """Class encapculations interactions with the YAML file"""
-    def __init__(self, filename):
-        self.filename = filename
-
-    def read(self):
-        with open(self.filename, "r") as f:
-            blob = yaml.safe_load(f)
-        return blob
-
-    def write(self, blob):
-        with open(self.filename, "w") as f:
-            yaml.dump(blob, f)
-
-
-################################################################################
 class Team:
     """Class encapsulates team data as well as multiple methods for
     constructing the object from different sources."""
+
     def __init__(self, name, race, coach, dtag):
         self.name = name
         self.race = race
@@ -34,13 +19,16 @@ class Team:
 
     @classmethod
     def from_dict(cls, team_info):
-        # print(team_info)
+        """Returns a class object filled with data from a dictionary (the
+        format the YAML file will return)."""
         return cls(
             team_info["name"], team_info["race"], team_info["coach"], team_info["dtag"]
         )
 
     @classmethod
     def from_str(cls, team_str):
+        """Returns a class object filled with data from a string (the
+        format when creating a team from the command line)."""
         team_list = team_str.split(",")
         if team_list[2].lstrip() == "AI":
             return cls(
@@ -57,7 +45,9 @@ class Team:
         )
 
     @property
-    def to_dict(self):
+    def yaml(self):
+        """Returns a dictionary object to be used to create the data structure
+        that is built up into the final overall YAML structure."""
         return {
             "name": self.name,
             "race": self.race,
@@ -70,37 +60,128 @@ class League(list):
     """A customized list class encapsulating specific method for constructing
     the class out of a dictionary and Team objects.  May have additional
     custom methods later."""
+
     def __init__(self, teams_dict):
         super().__init__()
         for team_dict in teams_dict:
             self.append(Team.from_dict(team_dict))
 
+    @property
+    def yaml(self):
+        """Returns a list object to be used to create the data structure
+        that is built up into the final overall YAML structure."""
+        return [team.yaml for team in self]
+
 
 ################################################################################
 class Game:
-    def __init__(self, team_nums, league):
-        self.home = league[team_nums[0]]
-        self.away = league[team_nums[1]]
+    """Class that encapsulates the data pertaining to a single game in a
+    tournament structure."""
+
+    def __init__(self, game_data, league):
+        """Initialization of Game object.  Keeping the Team object associated
+        with each position as well as the index.  The index is used for
+        recreating the YAML object."""
+        self.home_index = game_data["home"]
+        self.away_index = game_data["away"]
+        self.home = league[game_data["home"]]
+        self.away = league[game_data["away"]]
+
+    @property
+    def yaml(self):
+        """Returns a dictionary object to be used to create the data structure
+        that is built up into the final overall YAML structure."""
+        return {"home": self.home_index, "away": self.away_index}
 
 
 class Week(list):
+    """Class that encapsulates the data pertaining to a single week in a
+    tournament structure."""
+
     def __init__(self, game_list, league):
         super().__init__()
         for game in game_list:
             self.append(Game(game, league))
 
+    @property
+    def yaml(self):
+        """Returns a list object to be used to create the data structure
+        that is built up into the final overall YAML structure."""
+        return [game.yaml for game in self]
+
 
 class Schedule(list):
+    """Class that encapsulates the data holding every week (and then every
+    subsequent game) in a tournament structure."""
+
     def __init__(self, schedule_dict, league):
         super().__init__()
         for week in schedule_dict:
             self.append(Week(schedule_dict[week], league))
 
+    @property
+    def yaml(self):
+        """Returns a dictionary object to be used to create the data structure
+        that is built up into the final overall YAML structure."""
+        return {f"week_{idx}": week.yaml for (idx, week) in enumerate(self)}
+
+
+################################################################################
+class TourneyFile:
+    """Class encapculations interactions with the YAML file.  No one outside
+    of this class ought to be exposed to THE BLOB."""
+
+    def __init__(self, filename):
+        self.filename = filename
+
+    def read(self):
+        with open(self.filename, "r") as f:
+            blob = yaml.safe_load(f)
+        self.league = League(blob["teams"])
+        self.schedule = Schedule(blob["schedule"], self.league)
+        self.current_week = blob["current_week"]
+        return self.league, self.schedule, self.current_week
+
+    def write(self, blob):
+        with open(self.filename, "w") as f:
+            yaml.dump(blob, f)
+
+    def create(self):
+        blob = {"current_week": 0, "teams": None, "schedule": None}
+        self.write(blob)
+
+    def add_team(self, team_str):
+        self.read()
+        self.league.append(Team.from_str(team_str))
+        self.write(self.make_blob)
+
+    def del_team(self, team_name):
+        self.read()
+        for idx, team in enumerate(self.league):
+            if team.name == team_name:
+                del self.league[idx]
+                self.write(self.make_blob)
+                break
+        else:
+            print(f"Team {team_name} not found!")
+
+    def incr_week(self):
+        self.read()
+        self.current_week += 1
+        self.write(self.make_blob)
+
+    @property
+    def make_blob(self):
+        return {
+            "current_week": self.current_week,
+            "teams": self.league.yaml,
+            "schedule": self.schedule.yaml,
+        }
+
 
 ################################################################################
 def report_teams(tfile):
-    blob = tfile.read()
-    league = League(blob["teams"])
+    league, schedule, current_week = tfile.read()
     print(f"Number of teams: {len(league)}")
     for idx, team in enumerate(league):
         print(f"-- Team #{idx} ---------------------------")
@@ -111,42 +192,12 @@ def report_teams(tfile):
 
 
 def report_schedule(tfile):
-    blob = tfile.read()
-    league = League(blob["teams"])
-    schedule = Schedule(blob["schedule"], league)
+    league, schedule, current_week = tfile.read()
     print(f"Number of weeks in the schedule: {len(schedule)}")
     for idx, week in enumerate(schedule):
         print(f"-- Week #{idx} ---------------------------")
         for game in week:
             print(f"Home: {game.home.name:40} Away: {game.away.name:40}")
-
-
-def create_tfile(tfile):
-    blob = {"num_weeks": 0, "teams": None, "schedule": None}
-    tfile.write(blob)
-
-
-def add_team(tfile, team_str):
-    team = Team.from_str(team_str)
-    blob = tfile.read()
-    blob["num_teams"] += 1
-    if blob["teams"] is not None:
-        blob["teams"].append(team.to_dict)
-    else:
-        blob["teams"] = [team.to_dict]
-    tfile.write(blob)
-
-
-def del_team(tfile, team_name):
-    blob = tfile.read()
-    for idx, val in enumerate(blob["teams"]):
-        if val["name"] == team_name:
-            del blob["teams"][idx]
-            blob["num_teams"] -= 1
-            tfile.write(blob)
-            break
-    else:
-        print(f"Team {team_name} not found!")
 
 
 ################################################################################
@@ -172,9 +223,9 @@ def main():
     )
     parser.add_argument(
         "--del_team",
-        help='''Removes a team from the list.  Team should be specified by
+        help="""Removes a team from the list.  Team should be specified by
         team name.  If there are spaces in the name, please surround the name
-        with quotes.''',
+        with quotes.""",
     )
     parser.add_argument(
         "--report",
@@ -183,14 +234,14 @@ def main():
     )
     args = parser.parse_args()
 
-    tfile = TourneyYAML(args.filename)
+    tfile = TourneyFile(args.filename)
 
     if args.create:
-        create_tfile(tfile)
+        tfile.create()
     elif args.add_team:
-        add_team(tfile, args.add_team)
+        tfile.add_team(args.add_team)
     elif args.del_team:
-        del_team(tfile, args.del_team)
+        tfile.del_team(args.del_team)
     elif args.report == "teams":
         print("======================================")
         report_teams(tfile)
