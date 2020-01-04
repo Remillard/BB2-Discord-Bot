@@ -66,14 +66,9 @@ class League(list):
         # of dictionary objects that must be parsed and then we fill our
         # list with Team objects.
         super().__init__()
-        #
-        # !!!! DO NOT DO THIS !!!! See comment from /u/miwdw34 in reddit
-        # mails on the why and how to fix.
-        #
-        self = []
-        if teams_dict is not None:
-            for team_dict in teams_dict:
-                self.append(Team.from_dict(team_dict))
+        teams_dict = teams_dict or []
+        for team_dict in teams_dict:
+            self.append(Team.from_dict(team_dict))
 
     @property
     def yaml(self):
@@ -87,14 +82,16 @@ class Game:
     """Class that encapsulates the data pertaining to a single game in a
     tournament structure."""
 
-    def __init__(self, game_data, league):
+    def __init__(self, game_data):
         """Initialization of Game object.  Keeping the Team object associated
         with each position as well as the index.  The index is used for
         recreating the YAML object."""
         self.home_index = game_data["home"]
         self.away_index = game_data["away"]
-        self.home = league[game_data["home"]]
-        self.away = league[game_data["away"]]
+
+    def add_team_data(self, league):
+        self.home = league[self.home_index]
+        self.away = league[self.away_index]
 
     @property
     def yaml(self):
@@ -107,10 +104,10 @@ class Week(list):
     """Class that encapsulates the data pertaining to a single week in a
     tournament structure."""
 
-    def __init__(self, game_list, league):
+    def __init__(self, game_list):
         super().__init__()
         for game in game_list:
-            self.append(Game(game, league))
+            self.append(Game(game))
 
     @property
     def yaml(self):
@@ -123,19 +120,13 @@ class Schedule(list):
     """Class that encapsulates the data holding every week (and then every
     subsequent game) in a tournament structure."""
 
-    def __init__(self, schedule_dict=None, league=None):
+    def __init__(self, schedule_dict=None):
         # Again we expect to get either nothing, or a dictionary with
-        # keys labeling the weeks.  Not entirely sure what to do if League
-        # object is empty.
+        # keys labeling the weeks.
         super().__init__()
-        if schedule_dict is None and league is None:
-            self = []
-        elif schedule_dict is None or league is None:
-            print('''Error:  Schedule may not be initiated without both a
-                schedule dictionary and league object.''')
-        else:
-            for week in schedule_dict:
-                self.append(Week(schedule_dict[week], league))
+        schedule_dict = schedule_dict or {}
+        for week in schedule_dict:
+            self.append(Week(schedule_dict[week]))
 
     @property
     def yaml(self):
@@ -152,7 +143,8 @@ class TourneyFile:
     def __init__(self, filename):
         self.filename = filename
         self.league = League()
-        self.schedule = None
+        self.schedule = Schedule()
+        self.current_week = 0
 
     def read(self):
         """Reading the YAML file and parsing the results.  Have to check
@@ -162,14 +154,12 @@ class TourneyFile:
             blob = yaml.safe_load(f)
         # Checking the population of the blob against these keys.  The
         # list initializer does not like None as an input.
-        if blob["teams"] is not None:
+        if blob["teams"]:
             self.league = League(blob["teams"])
-        if blob["schedule"] is not None:
-            self.schedule = Schedule(blob["schedule"], self.league)
-        if blob['current_week'] is not None:
+        if blob["schedule"]:
+            self.schedule = Schedule(blob["schedule"])
+        if blob["current_week"]:
             self.current_week = blob["current_week"]
-        else:
-            self.current_week = None
         return self.league, self.schedule, self.current_week
 
     def write(self, blob):
@@ -177,8 +167,8 @@ class TourneyFile:
             yaml.dump(blob, f)
 
     def create(self):
-        blob = {"current_week": 0, "teams": None, "schedule": None}
-        self.write(blob)
+        #blob = {"current_week": 0, "teams": None, "schedule": None}
+        self.write(self.make_blob)
 
     def add_team(self, team_str):
         self.read()
@@ -212,7 +202,7 @@ class TourneyFile:
         return {
             "current_week": self.current_week,
             "teams": teams_result,
-            "schedule": schedule_result
+            "schedule": schedule_result,
         }
 
 
@@ -234,6 +224,7 @@ def report_schedule(tfile):
     for idx, week in enumerate(schedule):
         print(f"-- Week #{idx} ---------------------------")
         for game in week:
+            game.add_team_data(league)
             print(f"Home: {game.home.name:40} Away: {game.away.name:40}")
 
 
