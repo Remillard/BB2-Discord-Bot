@@ -260,23 +260,39 @@ def main():
         choices=["teams", "schedule", "full"],
         help="Produces the selected report for the tournament.",
     )
+    parser.add_argument(
+        "--add_week",
+        action="store_true",
+        help='''Adds a week to the current schedule.'''
+    )
+    parser.add_argument(
+        "--add_game",
+        help='''Adds any number of games to the week.  Should be followed by a
+        list of numbers corresponding to team indexes (as seen by --report
+        teams).  The numbers are interpreted as pairs, home team first,
+        followed by the away team.  If an odd number of teams are added, the
+        last team in the list is given a 'bye' game for the week.  Example #1
+        --add_game 0 1 2 3 4 5 will produce 3 games in the week with Team 0
+        playing at home against Team 1 playing away, and so on with pairings,
+        2 vs 3, and 4 vs 5.  Example #2 --add_game 3 2 1 4 5 will produce three
+        games, 3 vs 2, 1 vs 4, and Team 5 gets a bye.''')
     args = parser.parse_args()
 
     tfile = TourneyFile(args.filename)
 
     if args.create:
         tfile.create()
-    elif args.add_team:
+    if args.add_team:
         tfile.add_team(args.add_team)
-    elif args.del_team:
+    if args.del_team:
         tfile.del_team(args.del_team)
-    elif args.report == "teams":
+    if args.report == "teams":
         print("======================================")
         report_teams(tfile)
-    elif args.report == "schedule":
+    if args.report == "schedule":
         print("======================================")
         report_schedule(tfile)
-    elif args.report == "full":
+    if args.report == "full":
         print("======================================")
         report_teams(tfile)
         print("======================================")
