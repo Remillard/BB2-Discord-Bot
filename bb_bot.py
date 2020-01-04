@@ -61,10 +61,15 @@ class League(list):
     the class out of a dictionary and Team objects.  May have additional
     custom methods later."""
 
-    def __init__(self, teams_dict):
+    def __init__(self, teams_dict=None):
+        # Expect to receive nothing and initialize an empty list, or a list
+        # of dictionary objects that must be parsed and then we fill our
+        # list with Team objects.
         super().__init__()
-        for team_dict in teams_dict:
-            self.append(Team.from_dict(team_dict))
+        self = []
+        if teams_dict is not None:
+            for team_dict in teams_dict:
+                self.append(Team.from_dict(team_dict))
 
     @property
     def yaml(self):
@@ -114,10 +119,19 @@ class Schedule(list):
     """Class that encapsulates the data holding every week (and then every
     subsequent game) in a tournament structure."""
 
-    def __init__(self, schedule_dict, league):
+    def __init__(self, schedule_dict=None, league=None):
+        # Again we expect to get either nothing, or a dictionary with
+        # keys labeling the weeks.  Not entirely sure what to do if League
+        # object is empty.
         super().__init__()
-        for week in schedule_dict:
-            self.append(Week(schedule_dict[week], league))
+        if schedule_dict is None and league is None:
+            self = []
+        elif schedule_dict is None or league is None:
+            print('''Error:  Schedule may not be initiated without both a
+                schedule dictionary and league object.''')
+        else:
+            for week in schedule_dict:
+                self.append(Week(schedule_dict[week], league))
 
     @property
     def yaml(self):
@@ -133,7 +147,7 @@ class TourneyFile:
 
     def __init__(self, filename):
         self.filename = filename
-        self.league = None
+        self.league = League()
         self.schedule = None
 
     def read(self):
@@ -164,13 +178,7 @@ class TourneyFile:
 
     def add_team(self, team_str):
         self.read()
-        if self.league is not None:
-            self.league.append(Team.from_str(team_str))
-        else:
-            # This is a workaround because the League initializer expects a
-            # dictionary in a list and append expects a Team object.
-            team = Team.from_str(team_str)
-            self.league = League([team.yaml])
+        self.league.append(Team.from_str(team_str))
         self.write(self.make_blob)
 
     def del_team(self, team_name):
