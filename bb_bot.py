@@ -66,6 +66,10 @@ class League(list):
         # of dictionary objects that must be parsed and then we fill our
         # list with Team objects.
         super().__init__()
+        #
+        # !!!! DO NOT DO THIS !!!! See comment from /u/miwdw34 in reddit
+        # mails on the why and how to fix.
+        #
         self = []
         if teams_dict is not None:
             for team_dict in teams_dict:
