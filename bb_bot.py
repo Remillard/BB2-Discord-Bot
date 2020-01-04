@@ -133,13 +133,25 @@ class TourneyFile:
 
     def __init__(self, filename):
         self.filename = filename
+        self.league = None
+        self.schedule = None
 
     def read(self):
+        """Reading the YAML file and parsing the results.  Have to check
+        to make sure fields are populated before creating the data structures.
+        """
         with open(self.filename, "r") as f:
             blob = yaml.safe_load(f)
-        self.league = League(blob["teams"])
-        self.schedule = Schedule(blob["schedule"], self.league)
-        self.current_week = blob["current_week"]
+        # Checking the population of the blob against these keys.  The
+        # list initializer does not like None as an input.
+        if blob["teams"] is not None:
+            self.league = League(blob["teams"])
+        if blob["schedule"] is not None:
+            self.schedule = Schedule(blob["schedule"], self.league)
+        if blob['current_week'] is not None:
+            self.current_week = blob["current_week"]
+        else:
+            self.current_week = None
         return self.league, self.schedule, self.current_week
 
     def write(self, blob):
@@ -152,11 +164,18 @@ class TourneyFile:
 
     def add_team(self, team_str):
         self.read()
-        self.league.append(Team.from_str(team_str))
+        if self.league is not None:
+            self.league.append(Team.from_str(team_str))
+        else:
+            # This is a workaround because the League initializer expects a
+            # dictionary in a list and append expects a Team object.
+            team = Team.from_str(team_str)
+            self.league = League([team.yaml])
         self.write(self.make_blob)
 
     def del_team(self, team_name):
         self.read()
+        print(f"self.league is {self.league}")
         for idx, team in enumerate(self.league):
             if team.name == team_name:
                 del self.league[idx]
@@ -172,10 +191,16 @@ class TourneyFile:
 
     @property
     def make_blob(self):
+        teams_result = None
+        if self.league is not None:
+            teams_result = self.league.yaml
+        schedule_result = None
+        if self.schedule is not None:
+            schedule_result = self.schedule.yaml
         return {
             "current_week": self.current_week,
-            "teams": self.league.yaml,
-            "schedule": self.schedule.yaml,
+            "teams": teams_result,
+            "schedule": schedule_result
         }
 
 
