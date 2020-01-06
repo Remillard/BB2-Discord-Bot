@@ -88,8 +88,12 @@ class Game:
         recreating the YAML object."""
         self.home_index = game_data["home"]
         self.away_index = game_data["away"]
+        self.home = None
+        self.away = None
 
     def add_team_data(self, league):
+        """Method contains a Team object for the purposes of reporting and
+        matching an index number to a Team name."""
         self.home = league[self.home_index]
         self.away = league[self.away_index]
 
@@ -163,19 +167,23 @@ class TourneyFile:
         return self.league, self.schedule, self.current_week
 
     def write(self, blob):
+        """Encapsulated YAML writing method."""
         with open(self.filename, "w") as f:
             yaml.dump(blob, f)
 
     def create(self):
-        #blob = {"current_week": 0, "teams": None, "schedule": None}
+        """Encapsulated YAML initial file state method."""
+        # blob = {"current_week": 0, "teams": None, "schedule": None}
         self.write(self.make_blob)
 
     def add_team(self, team_str):
+        """Encapsulated team addition method."""
         self.read()
         self.league.append(Team.from_str(team_str))
         self.write(self.make_blob)
 
     def del_team(self, team_name):
+        """Encapsulated team deletion method."""
         self.read()
         print(f"self.league is {self.league}")
         for idx, team in enumerate(self.league):
@@ -187,12 +195,15 @@ class TourneyFile:
             print(f"Team {team_name} not found!")
 
     def incr_week(self):
+        """Method to increment the current week."""
         self.read()
         self.current_week += 1
         self.write(self.make_blob)
 
     @property
     def make_blob(self):
+        """Method that constructs the YAML data block (the "blob") from our
+        internal data state."""
         teams_result = None
         if self.league is not None:
             teams_result = self.league.yaml
@@ -208,6 +219,8 @@ class TourneyFile:
 
 ################################################################################
 def report_teams(tfile):
+    """Method to print a report for the team data structures retrieved from the
+    YAML file."""
     league, schedule, current_week = tfile.read()
     print(f"Number of teams: {len(league)}")
     for idx, team in enumerate(league):
@@ -219,6 +232,8 @@ def report_teams(tfile):
 
 
 def report_schedule(tfile):
+    """Method to print a report of the schedule data retrieved from the YAML
+    file."""
     league, schedule, current_week = tfile.read()
     print(f"Number of weeks in the schedule: {len(schedule)}")
     for idx, week in enumerate(schedule):
@@ -230,6 +245,7 @@ def report_schedule(tfile):
 
 ################################################################################
 def main():
+    """Main command line entry point."""
     parser = argparse.ArgumentParser(
         prog="bb2_bot",
         description="Program to manipulate a Blood Bowl 2 tournament data file.",
@@ -263,11 +279,11 @@ def main():
     parser.add_argument(
         "--add_week",
         action="store_true",
-        help='''Adds a week to the current schedule.'''
+        help="""Adds a week to the current schedule.""",
     )
     parser.add_argument(
         "--add_game",
-        help='''Adds any number of games to the week.  Should be followed by a
+        help="""Adds any number of games to the week.  Should be followed by a
         list of numbers corresponding to team indexes (as seen by --report
         teams).  The numbers are interpreted as pairs, home team first,
         followed by the away team.  If an odd number of teams are added, the
@@ -275,7 +291,8 @@ def main():
         --add_game 0 1 2 3 4 5 will produce 3 games in the week with Team 0
         playing at home against Team 1 playing away, and so on with pairings,
         2 vs 3, and 4 vs 5.  Example #2 --add_game 3 2 1 4 5 will produce three
-        games, 3 vs 2, 1 vs 4, and Team 5 gets a bye.''')
+        games, 3 vs 2, 1 vs 4, and Team 5 gets a bye.""",
+    )
     args = parser.parse_args()
 
     tfile = TourneyFile(args.filename)
