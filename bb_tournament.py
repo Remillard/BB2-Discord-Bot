@@ -247,7 +247,7 @@ def report_schedule(tfile):
 def main():
     """Main command line entry point."""
     parser = argparse.ArgumentParser(
-        prog="bb2_bot",
+        prog="bb_tournament",
         description="Program to manipulate a Blood Bowl 2 tournament data file.",
     )
     parser.add_argument("filename", help="The tournament data file (YAML format).")
