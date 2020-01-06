@@ -12,6 +12,7 @@ class TriviaFile:
 
     def __init__(self, filename):
         self.filename = filename
+        self.fileread = False
         self.trivia = []
 
     def read(self):
@@ -19,13 +20,14 @@ class TriviaFile:
         with open(self.filename, "r") as f:
             blob = yaml.safe_load(f)
         self.trivia = blob["trivia"]
+        self.fileread = True
 
     def __str__(self):
         """Given a list of trivia facts, select one randomly and returns it so
         it may be printed."""
-        self.read()
-        val = random.randint(0, len(self.trivia) - 1)
-        return self.trivia[val]
+        if not self.fileread:
+            self.read()
+        return random.choice(self.trivia)
 
 
 ################################################################################
