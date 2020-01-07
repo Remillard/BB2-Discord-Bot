@@ -90,6 +90,12 @@ class Game:
         self.away_index = game_data["away"]
         self.home = None
         self.away = None
+        self.result = {}
+        self.result["home"] = game_data["result"]["home"]
+        self.result["away"] = game_data["result"]["away"]
+        self.played = False
+        if self.result["home"] != -1 and self.result["away"] != -1:
+            self.played = True
 
     def add_team_data(self, league):
         """Method contains a Team object for the purposes of reporting and
@@ -237,10 +243,20 @@ def report_schedule(tfile):
     league, schedule, current_week = tfile.read()
     print(f"Number of weeks in the schedule: {len(schedule)}")
     for idx, week in enumerate(schedule):
-        print(f"-- Week #{idx} ---------------------------")
-        for game in week:
+        if idx == current_week:
+            print(f"-- Week #{idx} --" + " Current " + "-" * 63)
+        else:
+            print(f"-- Week #{idx} --" + "-" * 72)
+        for idx, game in enumerate(week):
             game.add_team_data(league)
-            print(f"Home: {game.home.name:30} Away: {game.away.name:30}")
+            if game.played:
+                print(
+                    f"Game: {idx} | Home: {game.home.name:25} Away: {game.away.name:25} Result: {game.result['home']}-{game.result['away']}"
+                )
+            else:
+                print(
+                    f"Game: {idx} | Home: {game.home.name:25} Away: {game.away.name:25}"
+                )
 
 
 ################################################################################
