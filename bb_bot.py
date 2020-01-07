@@ -2,6 +2,7 @@
 # See https://realpython.com/how-to-make-a-discord-bot-python/
 import os
 import argparse
+import random
 import bb_trivia
 from dotenv import load_dotenv
 from discord.ext import commands
@@ -51,6 +52,24 @@ async def trivia(ctx):
     tidbit = trivia_file.select
     print(tidbit)
     await ctx.send(tidbit)
+
+
+@bot.command(name="block", help="Rolls the selected number of block dice, 1-3.")
+async def block(ctx, num_dice: int):
+    SKULL = ":skull-1: "
+    BOTH = ":bothdown: "
+    PUSH = ":push: "
+    STUMBLE = ":stumbles: "
+    POW = ":pow: "
+    block_die = [SKULL, BOTH, PUSH, PUSH, STUMBLE, POW]
+    line = ""
+    if 0 < num_dice <= 3:
+        for i in range(num_dice):
+            line += random.choice(block_die)
+        await ctx.send(line)
+    else:
+        await ctx.send("ERROR: Will only roll 1-3 dice.")
+
 
 
 ################################################################################
