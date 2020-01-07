@@ -240,7 +240,7 @@ def report_schedule(tfile):
         print(f"-- Week #{idx} ---------------------------")
         for game in week:
             game.add_team_data(league)
-            print(f"Home: {game.home.name:40} Away: {game.away.name:40}")
+            print(f"Home: {game.home.name:30} Away: {game.away.name:30}")
 
 
 ################################################################################

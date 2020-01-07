@@ -7,7 +7,10 @@ from dotenv import load_dotenv
 from discord.ext import commands
 
 
-##################
+
+################################################################################
+# Test method for getting used to Discord API
+################################################################################
 def dump_context(ctx):
     print("Message Parameters Dump")
     print("=======================")
@@ -18,7 +21,7 @@ def dump_context(ctx):
     print(f"Message was in Guild: {ctx.guild}")
     print(f"Message was in channel: {ctx.channel}")
     print(f"Message printed at: {ctx.message.created_at}")
-##################
+
 
 ################################################################################
 # Read the invocation arguments and initialize the various files.
@@ -31,20 +34,23 @@ args = parser.parse_args()
 trivia_file = bb_trivia.TriviaFile(args.filename)
 
 
-
 ################################################################################
 # Discord Bot Commands
 ################################################################################
 bot = commands.Bot(command_prefix="!")
+
+
 @bot.event
 async def on_ready():
     print(f"{bot.user.name} has connected to Discord.")
 
+
 @bot.command(name="trivia", help="Responds with a randomly selected bit of trivia.")
 async def trivia(ctx):
     dump_context(ctx)
-    print(trivia_file)
-    await ctx.send(trivia_file)
+    tidbit = trivia_file.select
+    print(tidbit)
+    await ctx.send(tidbit)
 
 
 ################################################################################
@@ -55,5 +61,3 @@ load_dotenv()
 token = os.getenv("BBB_DISCORD_TOKEN")
 print(f"Proceeding with BloodBowlBot Token: {token}")
 bot.run(token)
-
-

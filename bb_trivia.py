@@ -22,6 +22,14 @@ class TriviaFile:
         self.trivia = blob["trivia"]
         self.fileread = True
 
+    @property
+    def select(self):
+        """Returning a string assignment version (since __str__ is meant to be
+        used with print and other methods.)"""
+        if not self.fileread:
+            self.read()
+        return random.choice(self.trivia)
+
     def __str__(self):
         """Given a list of trivia facts, select one randomly and returns it so
         it may be printed."""
