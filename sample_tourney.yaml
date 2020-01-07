@@ -4,49 +4,49 @@ schedule:
   - away: 1
     home: 0
     result:
-    - home: 0
+      home: 0
       away: 1
   - away: 3
     home: 2
     result:
-    - home: 2
+      home: 2
       away: 0
   - away: 5
     home: 4
     result:
-    - home: 1
+      home: 1
       away: 1
   week_1:
   - away: 2
     home: 0
     result:
-    - home: -1
+      home: -1
       away: -1
   - away: 4
     home: 1
     result:
-    - home: -1
+      home: -1
       away: -1
   - away: 5
     home: 3
     result:
-    - home: -1
+      home: -1
       away: -1
   week_2:
   - away: 4
     home: 0
     result:
-    - home: -1
+      home: -1
       away: -1
   - away: 3
     home: 1
     result:
-    - home: -1
+      home: -1
       away: -1
   - away: 5
     home: 2
     result:
-    - home: -1
+      home: -1
       away: -1
 teams:
 - coach: Remillard
