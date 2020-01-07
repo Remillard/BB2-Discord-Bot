@@ -2,7 +2,6 @@
 """This module implements classes and methods for manipulating Blood Bowl 2
 team names and league schedules in order to facilitate command line operation
 and a Discord Bot API in the future."""
-import sys
 import argparse
 import yaml
 
@@ -86,13 +85,15 @@ class Game:
         """Initialization of Game object.  Keeping the Team object associated
         with each position as well as the index.  The index is used for
         recreating the YAML object."""
+        # Initial state variables from the instance data
         self.home_index = game_data["home"]
         self.away_index = game_data["away"]
-        self.home = None
-        self.away = None
         self.result = {}
         self.result["home"] = game_data["result"]["home"]
         self.result["away"] = game_data["result"]["away"]
+        # Secondary variables
+        self.home = None
+        self.away = None
         self.played = False
         if self.result["home"] != -1 and self.result["away"] != -1:
             self.played = True
@@ -107,7 +108,12 @@ class Game:
     def yaml(self):
         """Returns a dictionary object to be used to create the data structure
         that is built up into the final overall YAML structure."""
-        return {"home": self.home_index, "away": self.away_index}
+        return {"home": self.home_index, "away": self.away_index, "result": self.result}
+
+    def __str__(self):
+        if self.played:
+            return f"Home: {self.home.name:25} Away: {self.away.name:25} Result: {self.result['home']}-{self.result['away']}"
+        return f"Home: {self.home.name:25} Away: {self.away.name:25}"
 
 
 class Week(list):
@@ -116,6 +122,7 @@ class Week(list):
 
     def __init__(self, game_list):
         super().__init__()
+        self.current = False
         for game in game_list:
             self.append(Game(game))
 
@@ -124,6 +131,16 @@ class Week(list):
         """Returns a list object to be used to create the data structure
         that is built up into the final overall YAML structure."""
         return [game.yaml for game in self]
+
+    def __str__(self):
+        if self.current:
+            lines = [" Current " + "-" * 63]
+        else:
+            lines = ["-" * 72]
+        for game_idx, game in enumerate(self):
+            lines.append(f"Game: {game_idx} | {game}")
+        return '\n'.join(lines)
+
 
 
 class Schedule(list):
@@ -143,6 +160,29 @@ class Schedule(list):
         """Returns a dictionary object to be used to create the data structure
         that is built up into the final overall YAML structure."""
         return {f"week_{idx}": week.yaml for (idx, week) in enumerate(self)}
+
+
+    @property
+    def full_report(self):
+        lines = [f"Number of weeks in the schedule: {len(self)}"]
+        for week_idx, week in enumerate(self):
+            lines.append(f"-- Week: {week_idx} --{week}")
+        return '\n'.join(lines)
+
+
+    def week_report(self, week_num):
+        lines = []
+        for week_idx, week in enumerate(self):
+            if week_idx == week_num:
+                lines.append(f"-- Week: {week_idx} --{week}")
+        return '\n'.join(lines)
+
+
+    def __str__(self):
+        lines = [f"Number of weeks in the schedule: {len(self)}"]
+        for week_idx, week in enumerate(self):
+            lines.append(f"-- Week: {week_idx} --{week}")
+        return '\n'.join(lines)
 
 
 ################################################################################
@@ -166,10 +206,15 @@ class TourneyFile:
         # list initializer does not like None as an input.
         if blob["teams"]:
             self.league = League(blob["teams"])
-        if blob["schedule"]:
-            self.schedule = Schedule(blob["schedule"])
         if blob["current_week"]:
             self.current_week = blob["current_week"]
+        if blob["schedule"]:
+            self.schedule = Schedule(blob["schedule"])
+            for week_idx, week in enumerate(self.schedule):
+                if week_idx == self.current_week:
+                    week.current = True
+                for game in week:
+                    game.add_team_data(self.league)
         return self.league, self.schedule, self.current_week
 
     def write(self, blob):
@@ -228,6 +273,7 @@ def report_teams(tfile):
     """Method to print a report for the team data structures retrieved from the
     YAML file."""
     league, schedule, current_week = tfile.read()
+    print("======================================")
     print(f"Number of teams: {len(league)}")
     for idx, team in enumerate(league):
         print(f"-- Team #{idx} ---------------------------")
@@ -237,26 +283,19 @@ def report_teams(tfile):
         print(f"Coach Discord Tag: {team.dtag}")
 
 
-def report_schedule(tfile):
+def report_full_schedule(tfile):
     """Method to print a report of the schedule data retrieved from the YAML
     file."""
     league, schedule, current_week = tfile.read()
-    print(f"Number of weeks in the schedule: {len(schedule)}")
-    for idx, week in enumerate(schedule):
-        if idx == current_week:
-            print(f"-- Week #{idx} --" + " Current " + "-" * 63)
-        else:
-            print(f"-- Week #{idx} --" + "-" * 72)
-        for idx, game in enumerate(week):
-            game.add_team_data(league)
-            if game.played:
-                print(
-                    f"Game: {idx} | Home: {game.home.name:25} Away: {game.away.name:25} Result: {game.result['home']}-{game.result['away']}"
-                )
-            else:
-                print(
-                    f"Game: {idx} | Home: {game.home.name:25} Away: {game.away.name:25}"
-                )
+    print("======================================")
+    print(schedule.full_report)
+
+
+def report_current_week(tfile):
+    league, schedule, current_week = tfile.read()
+    print("======================================")
+    print(schedule.week_report(current_week))
+
 
 
 ################################################################################
@@ -289,7 +328,7 @@ def main():
     )
     parser.add_argument(
         "--report",
-        choices=["teams", "schedule", "full"],
+        choices=["teams", "schedule", "full", "current"],
         help="Produces the selected report for the tournament.",
     )
     parser.add_argument(
@@ -319,17 +358,14 @@ def main():
         tfile.add_team(args.add_team)
     if args.del_team:
         tfile.del_team(args.del_team)
-    if args.report == "teams":
-        print("======================================")
+    if args.report == "teams" or args.report == "full":
         report_teams(tfile)
-    if args.report == "schedule":
-        print("======================================")
-        report_schedule(tfile)
-    if args.report == "full":
-        print("======================================")
-        report_teams(tfile)
-        print("======================================")
-        report_schedule(tfile)
+    if args.report == "schedule" or args.report == "full":
+        report_full_schedule(tfile)
+    if args.report == "current":
+        report_current_week(tfile)
+
+
 
 
 ################################################################################
