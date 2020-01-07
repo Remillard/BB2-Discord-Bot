@@ -139,8 +139,7 @@ class Week(list):
             lines = ["-" * 72]
         for game_idx, game in enumerate(self):
             lines.append(f"Game: {game_idx} | {game}")
-        return '\n'.join(lines)
-
+        return "\n".join(lines)
 
 
 class Schedule(list):
@@ -161,28 +160,28 @@ class Schedule(list):
         that is built up into the final overall YAML structure."""
         return {f"week_{idx}": week.yaml for (idx, week) in enumerate(self)}
 
-
     @property
     def full_report(self):
+        """Returns a string containing a full schedule report (every
+        week)"""
         lines = [f"Number of weeks in the schedule: {len(self)}"]
         for week_idx, week in enumerate(self):
             lines.append(f"-- Week: {week_idx} --{week}")
-        return '\n'.join(lines)
-
+        return "\n".join(lines)
 
     def week_report(self, week_num):
+        """Returns a string containing a single week report"""
         lines = []
         for week_idx, week in enumerate(self):
             if week_idx == week_num:
                 lines.append(f"-- Week: {week_idx} --{week}")
-        return '\n'.join(lines)
-
+        return "\n".join(lines)
 
     def __str__(self):
         lines = [f"Number of weeks in the schedule: {len(self)}"]
         for week_idx, week in enumerate(self):
             lines.append(f"-- Week: {week_idx} --{week}")
-        return '\n'.join(lines)
+        return "\n".join(lines)
 
 
 ################################################################################
@@ -267,35 +266,32 @@ class TourneyFile:
             "schedule": schedule_result,
         }
 
+    def report_teams(self):
+        """Method to print a report for the team data structures retrieved from the
+        YAML file."""
+        self.read()
+        print("======================================")
+        print(f"Number of teams: {len(self.league)}")
+        for idx, team in enumerate(self.league):
+            print(f"-- Team #{idx} ---------------------------")
+            print(f"Team Name: {team.name}")
+            print(f"Team Race: {team.race}")
+            print(f"Coach Name: {team.coach}")
+            print(f"Coach Discord Tag: {team.dtag}")
 
-################################################################################
-def report_teams(tfile):
-    """Method to print a report for the team data structures retrieved from the
-    YAML file."""
-    league, schedule, current_week = tfile.read()
-    print("======================================")
-    print(f"Number of teams: {len(league)}")
-    for idx, team in enumerate(league):
-        print(f"-- Team #{idx} ---------------------------")
-        print(f"Team Name: {team.name}")
-        print(f"Team Race: {team.race}")
-        print(f"Coach Name: {team.coach}")
-        print(f"Coach Discord Tag: {team.dtag}")
+    def report_full_schedule(self):
+        """Method to print a report of the schedule data retrieved from the YAML
+        file."""
+        self.read()
+        print("======================================")
+        print(self.schedule.full_report)
 
-
-def report_full_schedule(tfile):
-    """Method to print a report of the schedule data retrieved from the YAML
-    file."""
-    league, schedule, current_week = tfile.read()
-    print("======================================")
-    print(schedule.full_report)
-
-
-def report_current_week(tfile):
-    league, schedule, current_week = tfile.read()
-    print("======================================")
-    print(schedule.week_report(current_week))
-
+    def report_current_week(self):
+        """Method to print a report of the current week of schedule data
+        in the YAML file."""
+        self.read()
+        print("======================================")
+        print(self.schedule.week_report(self.current_week))
 
 
 ################################################################################
@@ -315,7 +311,7 @@ def main():
         "--add_team",
         help='''Adds a team to the tournament.  Format should be a comma
         separated list inside quotes in the following order:  "Team Name, Race,
-        Coach Name, Coach Discord Tag".  If the coach is an AI team, use "AI"
+        Coach Name, Coach Discoprd Tag".  If the coach is an AI team, use "AI"
         for the Coach Name field, and leave off the Discord Tag field.
         Example #1 --add_team "Super Joes, Khemri, John Doe, JDoe#9999"
         Example #2 --add_team "Doofus Name, Human, AI"''',
@@ -359,13 +355,11 @@ def main():
     if args.del_team:
         tfile.del_team(args.del_team)
     if args.report == "teams" or args.report == "full":
-        report_teams(tfile)
+        tfile.report_teams()
     if args.report == "schedule" or args.report == "full":
-        report_full_schedule(tfile)
+        tfile.report_full_schedule()
     if args.report == "current":
-        report_current_week(tfile)
-
-
+        tfile.report_current_week()
 
 
 ################################################################################
