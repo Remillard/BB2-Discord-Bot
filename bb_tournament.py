@@ -108,6 +108,10 @@ class Game:
         else:
             self.away = league[self.away_index]
 
+    def add_result(self, result_list):
+        self.result['home'] = result_list[0]
+        self.result['away'] = result_list[1]
+
     @property
     def yaml(self):
         """Returns a dictionary object to be used to create the data structure
@@ -137,6 +141,9 @@ class Week(list):
         from the YAML file and adds games to this week object."""
         for game in game_list:
             self.append(Game(game))
+
+    def add_result(self, result_list):
+        self[result_list[0]].add_result(result_list[1:])
 
     @property
     def yaml(self):
@@ -175,6 +182,9 @@ class Schedule(list):
         the schedule.  (or other week specified)"""
         self[week_num].add_games(game_list)
 
+    def add_result(self, result_list, week_num=-1):
+        self[week_num].add_result(result_list)
+
     @property
     def yaml(self):
         """Returns a dictionary object to be used to create the data structure
@@ -187,7 +197,7 @@ class Schedule(list):
         week)"""
         lines = [f"Number of weeks in the schedule: {len(self)}"]
         for week_idx, week in enumerate(self):
-            lines.append(f"-- Week: {week_idx} --{week}")
+            lines.append(f"-- Week: {week_idx+1} --{week}")
         return "\n".join(lines)
 
     def week_report(self, week_num):
@@ -277,20 +287,21 @@ class TourneyFile:
         self.read()
         # Need to create a translation from the list of strings of numbers
         # to the format the Game object wants.
+        game_list = list(map(int, game_list))
         newlist = []
         for idx in range(0, len(game_list), 2):
             if idx != len(game_list) - 1:
                 newlist.append(
                     {
-                        "home": int(game_list[idx]),
-                        "away": int(game_list[idx + 1]),
+                        "home": game_list[idx],
+                        "away": game_list[idx + 1],
                         "result": {"home": -1, "away": -1},
                     }
                 )
             else:
                 newlist.append(
                     {
-                        "home": int(game_list[idx]),
+                        "home": game_list[idx],
                         "away": 9999,
                         "result": {"home": -1, "away": -1},
                     }
@@ -298,10 +309,26 @@ class TourneyFile:
         self.schedule.add_games(newlist)
         self.write(self.make_blob)
 
+    def add_result(self, result_list):
+        """Receives a list of integers in strings.  Calls the schedule
+        object to record the result of the game."""
+        self.read()
+        result_list = list(map(int, result_list))
+        self.schedule.add_result(result_list, self.current_week)
+        self.write(self.make_blob)
+
     def incr_week(self):
         """Method to increment the current week."""
         self.read()
-        self.current_week += 1
+        if self.current_week < len(self.schedule) - 1:
+            self.current_week += 1
+        self.write(self.make_blob)
+
+    def decr_week(self):
+        """Method to increment the current week."""
+        self.read()
+        if self.current_week > 0:
+            self.current_week -= 1
         self.write(self.make_blob)
 
     @property
@@ -338,23 +365,20 @@ class TourneyFile:
         lines = []
         for idx, team in enumerate(self.league):
             lines.append(f"{idx}: Team Name: {team.name}")
-        text = '\n'.join(lines)
-        print(text)
+        text = "\n".join(lines)
         return text
 
     def report_full_schedule(self):
         """Method to print a report of the schedule data retrieved from the YAML
         file."""
         self.read()
-        print(self.schedule.full_report)
+        return self.schedule.full_report
 
     def report_current_week(self):
         """Method to print a report of the current week of schedule data
         in the YAML file."""
         self.read()
-        text = self.schedule.week_report(self.current_week)
-        print(text)
-        return text
+        return self.schedule.week_report(self.current_week)
 
 
 ################################################################################
@@ -386,14 +410,19 @@ def main():
         with quotes.""",
     )
     parser.add_argument(
-        "--report",
-        choices=["longteams", "shortteams", "schedule", "full", "current"],
-        help="Produces the selected report for the tournament.",
-    )
-    parser.add_argument(
         "--add_week",
         action="store_true",
         help="""Adds a week to the current schedule.""",
+    )
+    parser.add_argument(
+        "--incr_week",
+        action="store_true",
+        help="""Increments the current schedule week.""",
+    )
+    parser.add_argument(
+        "--decr_week",
+        action="store_true",
+        help="""Decrements the current schedule week.""",
     )
     parser.add_argument(
         "--add_games",
@@ -409,9 +438,18 @@ def main():
         games, 3 vs 2, 1 vs 4, and Team 5 gets a bye.""",
     )
     parser.add_argument(
-        "--incr_week",
-        action="store_true",
-        help="""Increments the current schedule week.""",
+        "--result",
+        nargs=3,
+        help="""Adds a result to a game in the current week.  Requires three
+        numbers following.  The first value is the number of the game as
+        listed in the schedule.  The second value is the home team score, and
+        the third and final value is the away team score.  Example: --result
+        3 1 0 adds a 1-0 result to game 3."""
+    )
+    parser.add_argument(
+        "--report",
+        choices=["longteams", "shortteams", "schedule", "full", "current"],
+        help="Produces the selected report for the tournament.",
     )
     args = parser.parse_args()
 
@@ -423,20 +461,24 @@ def main():
         tfile.add_team(args.add_team)
     if args.del_team:
         tfile.del_team(args.del_team)
+    if args.add_week:
+        tfile.add_week()
+    if args.incr_week:
+        tfile.incr_week()
+    if args.decr_week:
+        tfile.decr_week()
+    if args.add_games:
+        tfile.add_games(args.add_games)
+    if args.result:
+        tfile.add_result(args.result)
     if args.report == "longteams" or args.report == "full":
         tfile.report_teams_long()
     if args.report == "shortteams":
-        tfile.report_teams_short()
+        print(tfile.report_teams_short())
     if args.report == "schedule" or args.report == "full":
-        tfile.report_full_schedule()
+        print(tfile.report_full_schedule())
     if args.report == "current":
-        tfile.report_current_week()
-    if args.add_week:
-        tfile.add_week()
-    if args.add_games:
-        tfile.add_games(args.add_games)
-    if args.incr_week:
-        tfile.incr_week()
+        print(tfile.report_current_week())
 
 
 ################################################################################

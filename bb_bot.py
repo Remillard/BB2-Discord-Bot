@@ -31,14 +31,8 @@ def dump_context(ctx):
 parser = argparse.ArgumentParser(
     prog="bb_bot", description="Discord Bot handling casual Blood Bowl stuff."
 )
-parser.add_argument(
-    "--trivia_file",
-    help="The trivia data file (YAML format)."
-)
-parser.add_argument(
-    "--tourney_file",
-    help="The tournament data file (YAML format)."
-)
+parser.add_argument("--trivia_file", help="The trivia data file (YAML format).")
+parser.add_argument("--tourney_file", help="The tournament data file (YAML format).")
 args = parser.parse_args()
 trivia_file = bb_trivia.TriviaFile(args.trivia_file)
 tourney_file = bb_tournament.TourneyFile(args.tourney_file)
@@ -85,15 +79,19 @@ async def block_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
         await ctx.send("ERROR: Missing Required Argument")
 
-@bot.command(name="report", help="Prints a report on the current tournament.  Options are (currently) 'shortteams' and 'current' (week)")
+
+@bot.command(
+    name="report",
+    help="Prints a report on the current tournament.  Options are (currently) 'shortteams' and 'current' (week)",
+)
 async def report(ctx, option):
-    if option == 'shortteams':
+    if option == "shortteams":
         strblock = tourney_file.report_teams_short()
-        strblock = "```"+strblock+"```"
+        strblock = "```" + strblock + "```"
         await ctx.send(strblock)
-    elif option == 'current':
+    elif option == "current":
         strblock = tourney_file.report_current_week()
-        strblock = "```"+strblock+"```"
+        strblock = "```" + strblock + "```"
         await ctx.send(strblock)
     else:
         await ctx.send(f"ERROR: Option {option} not currently supported.")
