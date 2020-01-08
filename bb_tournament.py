@@ -195,7 +195,7 @@ class Schedule(list):
         lines = []
         for week_idx, week in enumerate(self):
             if week_idx == week_num:
-                lines.append(f"-- Week: {week_idx} --{week}")
+                lines.append(f"-- Week: {week_idx+1} --{week}")
         return "\n".join(lines)
 
     def __str__(self):
@@ -335,8 +335,12 @@ class TourneyFile:
     def report_teams_short(self):
         """Produces a condensed team name only list of the current teams"""
         self.read()
+        lines = []
         for idx, team in enumerate(self.league):
-            print(f"{idx}: Team Name: {team.name}")
+            lines.append(f"{idx}: Team Name: {team.name}")
+        text = '\n'.join(lines)
+        print(text)
+        return text
 
     def report_full_schedule(self):
         """Method to print a report of the schedule data retrieved from the YAML
@@ -348,7 +352,9 @@ class TourneyFile:
         """Method to print a report of the current week of schedule data
         in the YAML file."""
         self.read()
-        print(self.schedule.week_report(self.current_week))
+        text = self.schedule.week_report(self.current_week)
+        print(text)
+        return text
 
 
 ################################################################################
