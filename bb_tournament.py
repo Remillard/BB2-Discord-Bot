@@ -109,8 +109,10 @@ class Game:
             self.away = league[self.away_index]
 
     def add_result(self, result_list):
-        self.result['home'] = result_list[0]
-        self.result['away'] = result_list[1]
+        """Gets a list of scores [home, away] and sets the instances
+        values accordingly."""
+        self.result["home"] = result_list[0]
+        self.result["away"] = result_list[1]
 
     @property
     def yaml(self):
@@ -143,6 +145,8 @@ class Week(list):
             self.append(Game(game))
 
     def add_result(self, result_list):
+        """Gets a list of values for a game result.  [Game num, home score,
+        away score] and calls the game's method to set those values."""
         self[result_list[0]].add_result(result_list[1:])
 
     @property
@@ -183,6 +187,9 @@ class Schedule(list):
         self[week_num].add_games(game_list)
 
     def add_result(self, result_list, week_num=-1):
+        """Receives a list representing the result of a game, as well as the
+        week to apply the result to and call's the appropriate week object's
+        method to set the game result."""
         self[week_num].add_result(result_list)
 
     @property
@@ -444,7 +451,7 @@ def main():
         numbers following.  The first value is the number of the game as
         listed in the schedule.  The second value is the home team score, and
         the third and final value is the away team score.  Example: --result
-        3 1 0 adds a 1-0 result to game 3."""
+        3 1 0 adds a 1-0 result to game 3.""",
     )
     parser.add_argument(
         "--report",

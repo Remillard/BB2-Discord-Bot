@@ -3,14 +3,16 @@ A Discord Bot for handling casual Blood Bowl 2 tournament information
 
 ## TODO
 * List all games -- CLI Only
-* List all games in the current week
+* List all games in the current week -- CLI and Bot -- DONE!
 * List all games for a team across all weeks
 * List all teams -- CLI Only
 * Add teams -- CLI Only
 * Delete teams -- CLI Only
 * Update teams -- CLI Only
-* Update schedule
+* Update schedule -- CLI Only
+* Add game results -- CLI Only
 * Implement trivia selector and trivia file -- CLI and Bot -- DONE!
+* Implement silly dice rolling method for the Bot -- DONE!
 * Implement Discord API Bot -- DONE!
 
 ## Thanks and Attribution
