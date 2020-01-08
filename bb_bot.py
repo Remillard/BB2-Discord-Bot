@@ -4,9 +4,10 @@ import os
 import argparse
 import random
 import bb_trivia
+import bb_tournament
 from dotenv import load_dotenv
+import discord
 from discord.ext import commands
-
 
 
 ################################################################################
@@ -28,11 +29,19 @@ def dump_context(ctx):
 # Read the invocation arguments and initialize the various files.
 ################################################################################
 parser = argparse.ArgumentParser(
-    prog="bb_trivia", description="Prints out a random Blood Bowl trivia fact."
+    prog="bb_bot", description="Discord Bot handling casual Blood Bowl stuff."
 )
-parser.add_argument("filename", help="The trivia data file (YAML format).")
+parser.add_argument(
+    "--trivia_file",
+    help="The trivia data file (YAML format)."
+)
+parser.add_argument(
+    "--tourney_file",
+    help="The tournament data file (YAML format)."
+)
 args = parser.parse_args()
-trivia_file = bb_trivia.TriviaFile(args.filename)
+trivia_file = bb_trivia.TriviaFile(args.trivia_file)
+tourney_file = bb_tournament.TourneyFile(args.tourney_file)
 
 
 ################################################################################
@@ -56,11 +65,11 @@ async def trivia(ctx):
 
 @bot.command(name="block", help="Rolls the selected number of block dice, 1-3.")
 async def block(ctx, num_dice: int):
-    SKULL = ":skull-1: "
-    BOTH = ":bothdown: "
-    PUSH = ":push: "
-    STUMBLE = ":stumbles: "
-    POW = ":pow: "
+    SKULL = "<:skull:662928827974156288>"
+    BOTH = "<:bothdown:662928827948859392>"
+    PUSH = "<:push:662928827772567563>"
+    STUMBLE = "<:stumbles:662928827755921449>"
+    POW = "<:pow:662928827768373250>"
     block_die = [SKULL, BOTH, PUSH, PUSH, STUMBLE, POW]
     line = ""
     if 0 < num_dice <= 3:
@@ -70,6 +79,11 @@ async def block(ctx, num_dice: int):
     else:
         await ctx.send("ERROR: Will only roll 1-3 dice.")
 
+
+@block.error
+async def block_error(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send("ERROR: Missing Required Argument")
 
 
 ################################################################################
