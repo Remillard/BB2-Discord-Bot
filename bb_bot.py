@@ -82,19 +82,24 @@ async def block_error(ctx, error):
 
 @bot.command(
     name="report",
-    help="Prints a report on the current tournament.  Options are (currently) 'shortteams' and 'current' (week)",
+    help="Prints a report on the current tournament.  Valid options: 'team_summary' and 'current_week'",
 )
 async def report(ctx, option):
-    if option == "shortteams":
+    if option == "team_summary":
         strblock = tourney_file.report_teams_short()
         strblock = "```" + strblock + "```"
         await ctx.send(strblock)
-    elif option == "current":
+    elif option == "current_week":
         strblock = tourney_file.report_current_week()
         strblock = "```" + strblock + "```"
         await ctx.send(strblock)
     else:
         await ctx.send(f"ERROR: Option {option} not currently supported.")
+
+@report.error
+async def report_error(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send("ERROR: Missing Required Argument")
 
 
 ################################################################################
