@@ -196,7 +196,27 @@ class Schedule(list):
     def yaml(self):
         """Returns a dictionary object to be used to create the data structure
         that is built up into the final overall YAML structure."""
-        return {f"week_{idx}": week.yaml for (idx, week) in enumerate(self)}
+        # Special note here so that I don't forget the bug and why it's not
+        # 100% fixed.  Most of the YAML file is lists which does come back in
+        # order in YAML 1.1 (and that's what I'm using with pyyaml).  However
+        # for that "YAML readability" aspect, I used a dictionary for each week
+        # and then each week is labeled.  Dictionaries in 1.1 and PyYAML do
+        # NOT come back ordered.  They are printed in alphabetical order of
+        # keyword.  So once week numbers went to 2 digits it was printed
+        # week_0, week_1, week_10.  However there's something in the way it
+        # parses through the structure once the week is added in the middle
+        # that breaks everything.
+        #
+        # The workaround is to make the game numbers padded 3 digits for a
+        # maximum schedule of 1000 games (which is definitely more than we'd
+        # ever do.  However the parsing weakness is still in here.  I'm not
+        # sure if the bug is when the 2 digit week structure is read, or when
+        # games are added, or when it's written.
+        #
+        # Final solution would be to rework the YAML data structure to either
+        # full on YAML, or use ruamel.yaml and YAML 1.2, or go to SQLite or
+        # something like that.
+        return {f"week_{idx:03}": week.yaml for (idx, week) in enumerate(self)}
 
     @property
     def full_report(self):
