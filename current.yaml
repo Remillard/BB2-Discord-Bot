@@ -369,6 +369,47 @@ schedule:
     result:
       away: -1
       home: -1
+  week_9:
+  - away: 15
+    home: 1
+    result:
+      away: -1
+      home: -1
+  - away: 0
+    home: 2
+    result:
+      away: -1
+      home: -1
+  - away: 14
+    home: 3
+    result:
+      away: -1
+      home: -1
+  - away: 13
+    home: 4
+    result:
+      away: -1
+      home: -1
+  - away: 12
+    home: 5
+    result:
+      away: -1
+      home: -1
+  - away: 11
+    home: 6
+    result:
+      away: -1
+      home: -1
+  - away: 10
+    home: 7
+    result:
+      away: -1
+      home: -1
+  - away: 9
+    home: 8
+    result:
+      away: -1
+      home: -1
 teams:
 - coach: Rozwolf
   dtag: Kaipo#1111
