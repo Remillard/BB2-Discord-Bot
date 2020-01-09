@@ -132,8 +132,8 @@ schedule:
   - away: 7
     home: 5
     result:
-      away: -1
-      home: -1
+      away: 3
+      home: 0
   - away: 8
     home: 4
     result:
@@ -157,8 +157,8 @@ schedule:
   - away: 12
     home: 0
     result:
-      away: -1
-      home: -1
+      away: 1
+      home: 3
   - away: 13
     home: 14
     result:
