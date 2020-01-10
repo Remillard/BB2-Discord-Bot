@@ -142,8 +142,8 @@ schedule:
   - away: 9
     home: 3
     result:
-      away: -1
-      home: -1
+      away: 0
+      home: 3
   - away: 10
     home: 2
     result:
@@ -152,8 +152,8 @@ schedule:
   - away: 11
     home: 1
     result:
-      away: -1
-      home: -1
+      away: 0
+      home: 1
   - away: 12
     home: 0
     result:
@@ -617,55 +617,55 @@ schedule:
       home: -1
 teams:
 - coach: Rozwolf
-  dtag: Kaipo#1111
+  dtag: Kaipo the Rozwolf#9628
   name: Waxaklahun Ubah Kan
   race: Lizardman
 - coach: GaaHL
-  dtag: Liz#2222
+  dtag: Mephistopheles#1345
   name: Kaiserschlact
   race: Necromantic
 - coach: DarkHammish
-  dtag: Hammish#3333
+  dtag: Hammish#1754
   name: Doomhammeriffic
   race: Norse
 - coach: Remillard
-  dtag: Remi#4444
+  dtag: Remi#2160
   name: K-Tel Records - The 80s!
   race: Norse
 - coach: Tirrskll
-  dtag: Arn#5555
+  dtag: ook#1656
   name: Better to Hear You With
   race: Elven Union
 - coach: Tyreesae
-  dtag: Tyre#6666
+  dtag: Tyre#3203
   name: For the Greater Eats
   race: Ogre
 - coach: Dylan Scissell
-  dtag: Dylan#7777
+  dtag: Jinxer Boss#2228
   name: Spooky Scary Skeletonsz
   race: Khemri
 - coach: FleurDeMur
-  dtag: Fleur#8888
+  dtag: FleurDeMur#1942
   name: FL Men
   race: Lizardman
 - coach: Yldren
-  dtag: Yldren#9999
+  dtag: Yldren#5532
   name: Betty's Borises
   race: Dark Elf
 - coach: thedjally
-  dtag: djally#0000
+  dtag: thedjally#4556
   name: Twitch's Terrors
   race: Skaven
 - coach: Bthulhu Dunes
-  dtag: Kailindo#1111
+  dtag: Kailindo#4852
   name: Ogrimmar Saurfangs
   race: Orc
 - coach: Rende
-  dtag: Rende#2222
+  dtag: Rende#4526
   name: The Harmless Princesses
   race: Chaos
 - coach: Humbdinger
-  dtag: Humb#3333
+  dtag: Humbdinger#1030
   name: Cottage Cheese Fanatics
   race: Vampire
 - coach: AI

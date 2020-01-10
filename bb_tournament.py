@@ -391,7 +391,7 @@ class TourneyFile:
         self.read()
         lines = []
         for idx, team in enumerate(self.league):
-            lines.append(f"{idx:2}: Name: {team.name:30} Coach: {team.coach:15}")
+            lines.append(f"{idx:2}: Name: {team.name:30} Coach: {team.coach:15} Tag: {team.dtag:10}")
         text = "\n".join(lines)
         return text
 
