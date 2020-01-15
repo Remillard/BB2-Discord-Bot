@@ -2,6 +2,7 @@
 # See https://realpython.com/how-to-make-a-discord-bot-python/
 import os
 import argparse
+import itertools
 import random
 import xdice
 import bb_trivia
