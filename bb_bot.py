@@ -68,7 +68,7 @@ async def block(ctx, num_dice: int):
     block_die = [SKULL, BOTH, PUSH, PUSH, STUMBLE, POW]
     line = ""
     if 0 < num_dice <= 3:
-        for i in range(num_dice):
+        for _ in itertools.repeat(None, num_dice):
             line += random.choice(block_die)
         await ctx.send(line)
     else:
