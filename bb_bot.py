@@ -3,6 +3,7 @@
 import os
 import argparse
 import random
+import xdice
 import bb_trivia
 import bb_tournament
 from dotenv import load_dotenv
@@ -98,6 +99,19 @@ async def report(ctx, option):
 
 @report.error
 async def report_error(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send("ERROR: Missing Required Argument")
+
+@bot.command(
+    name="roll",
+    help="""Takes a dice expression as an argument (may contain simple math
+    operators as well.  Example: 3d4 + 1"""
+)
+async def roll(ctx, *, arg)
+    print(arg)
+
+@roll.error
+async def roll_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
         await ctx.send("ERROR: Missing Required Argument")
 
