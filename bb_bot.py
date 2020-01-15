@@ -106,10 +106,13 @@ async def report_error(ctx, error):
 @bot.command(
     name="roll",
     help="""Takes a dice expression as an argument (may contain simple math
-    operators as well.  Example: 3d4 + 1"""
+    operators as well.)  Example: 3d4 + 1"""
 )
 async def roll(ctx, *, arg):
-    print(arg)
+    ps = xdice.roll(arg)
+    line = f"```Roll Result: {ps} ---- Roll Internals: {ps.format(True)}```"
+    print(line)
+    await ctx.send(line)
 
 @roll.error
 async def roll_error(ctx, error):
