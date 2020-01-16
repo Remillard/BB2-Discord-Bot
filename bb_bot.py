@@ -110,7 +110,7 @@ async def report_error(ctx, error):
 )
 async def roll(ctx, *, arg):
     ps = xdice.roll(arg)
-    line = f"```Roll Result: {ps} ---- Roll Internals: {ps.format(True)}```"
+    line = f"```Roll Result: {ps} ---- Roll Internals: {ps.format()}```"
     print(line)
     await ctx.send(line)
 
