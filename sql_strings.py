@@ -5,13 +5,13 @@
 #
 ################################################################################
 create_coaches_table = """CREATE TABLE IF NOT EXISTS coaches (
-    id     INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    bb2_name     TEXT NOT NULL,
+    id           INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    bb_name      TEXT NOT NULL,
     discord_name TEXT NOT NULL,
     discord_id   INTEGER NOT NULL
 );"""
 insert_coach_cmd = (
-    """INSERT INTO coaches (bb2_name, discord_name, discord_id) VALUES (?, ?, ?) """
+    """INSERT INTO coaches (bb_name, discord_name, discord_id) VALUES (?, ?, ?) """
 )
 
 # Enumerated type for SQLite3

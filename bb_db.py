@@ -18,23 +18,21 @@ class DBFile:
 
     def __init__(self, filename):
         self.filename = filename
-        self.conn = self.create_connection()
-
-    def create_connection(self):
-        """Opens a connection with the database file the class instance is
-        associated with."""
-        conn = None
         try:
-            conn = sqlite3.connect(self.filename)
+            self.conn = sqlite3.connect(self.filename)
         except Error as e:
             print(e)
-        return conn
+        with self.conn:
+            print(f"Connection to {self.filename} created.")
 
-    def exec_sql(self, sql_cmd):
+    def exec_sql(self, sql_cmd, sql_val=None):
         """Executes the SQL command passed to the method."""
         try:
-            c = self.conn.cursor()
-            c.execute(sql_cmd)
+            with self.conn:
+                if sql_val is not None:
+                    self.conn.execute(sql_cmd, sql_val)
+                else:
+                    self.conn.execute(sql_cmd)
         except Error as e:
             print(e)
         self.conn.commit()
@@ -58,21 +56,37 @@ class DBFile:
         """Initializes new tables with table data that is intended to be used as
         enumerated types (which SQLite doesn't have.)"""
         print("Filling enumerated state tables.")
-        c = self.conn.cursor()
 
         sqlcmd = sqlstr.insert_gamestate_cmd
-        for item in sqlstr.initial_gamestate_table:
-            c.execute(sqlcmd, item)
-
+        try:
+            with self.conn:
+                self.conn.executemany(sqlcmd, sqlstr.initial_gamestate_table)
+        except Error as e:
+            print(e)
+            
         sqlcmd = sqlstr.insert_race_cmd
-        for item in sqlstr.initial_race_table:
-            c.execute(sqlcmd, item)
+        try:
+            with self.conn:
+                self.conn.executemany(sqlcmd, sqlstr.initial_race_table)
+        except Error as e:
+            print(e)
 
         sqlcmd = sqlstr.insert_tourneystate_cmd
-        for item in sqlstr.initial_tourneystate_table:
-            c.execute(sqlcmd, item)
+        try:
+            with self.conn:
+                self.conn.executemany(sqlcmd, sqlstr.initial_tourneystate_table)
+        except Error as e:
+            print(e)
 
         self.conn.commit()
+
+
+################################################################################
+class DBTable:
+    """Abstract class for a SQLite3 table for common functionality."""
+
+    def __init__(self, db_file):
+        self.db_file = db_file
 
 
 ################################################################################
@@ -101,7 +115,7 @@ def main():
     #
     parser = argparse.ArgumentParser(
         prog="bb_db",
-        description="Program to manipulate a Blood Bowl tournament database.",
+        description="Methods to create a Blood Bowl tournament database.",
     )
     parser.add_argument("filename", help="The tournament SQLite3 database file.")
     parser.add_argument(
