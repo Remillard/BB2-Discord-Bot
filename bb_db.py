@@ -49,14 +49,14 @@ def init_tables(db_conn):
 
 ################################################################################
 def init_enum_tables(db_conn):
-    sqlcmd = """INSERT INTO gamestates (state) VALUES (?)"""
+    sqlcmd = sqlstr.insert_gamestate_cmd
     c = db_conn.cursor()
     for item in sqlstr.initial_gamestate_table:
         c.execute(sqlcmd, item)
-    sqlcmd = """INSERT INTO races (race, bb_ver) VALUES (?, ?)"""
+    sqlcmd = sqlstr.insert_race_cmd
     for item in sqlstr.initial_race_table:
         c.execute(sqlcmd, item)
-    sqlcmd = """INSERT INTO tourneystates (state) VALUES (?)"""
+    sqlcmd = sqlstr.insert_tourneystate_cmd
     for item in sqlstr.initial_tourneystate_table:
         c.execute(sqlcmd, item)
     db_conn.commit()
@@ -64,9 +64,7 @@ def init_enum_tables(db_conn):
 
 ################################################################################
 def add_coach(db_conn, coach):
-    sqlcmd = (
-        """INSERT INTO coaches (bb2_name, discord_name, discord_id) VALUES (?, ?, ?)"""
-    )
+    sqlcmd = sqlstr.insert_coach_cmd
     c = db_conn.cursor()
     c.execute(sqlcmd, coach)
     db_conn.commit()
@@ -111,6 +109,7 @@ def main():
                 init_tables(db_conn)
                 print("Filling enumerated state tables.")
                 init_enum_tables(db_conn)
+                print(f"Database {args.filename} initialization complete!")
             else:
                 print("Error: DB connection handle invalid.")
         else:

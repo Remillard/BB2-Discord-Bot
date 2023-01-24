@@ -1,14 +1,18 @@
 #! python3
 ################################################################################
 #
-# Module of defined strings for SQL commands
+# Module of defined strings for SQLite commands for the Blood Bowl database.
 #
+################################################################################
 create_coaches_table = """CREATE TABLE IF NOT EXISTS coaches (
     id     INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     bb2_name     TEXT NOT NULL,
     discord_name TEXT NOT NULL,
     discord_id   INTEGER NOT NULL
 );"""
+insert_coach_cmd = (
+    """INSERT INTO coaches (bb2_name, discord_name, discord_id) VALUES (?, ?, ?) """
+)
 
 # Enumerated type for SQLite3
 # Examples include:
@@ -59,6 +63,7 @@ initial_race_table = [
     ("Orcs", 3),
     ("Skaven", 3),
 ]
+insert_race_cmd = """INSERT INTO races (race, bb_ver) VALUES (?, ?)"""
 
 create_teams_table = """CREATE TABLE IF NOT EXISTS teams (
     id       INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -79,6 +84,7 @@ create_tourneystates_table = """CREATE TABLE IF NOT EXISTS tourneystates (
     state TEXT NOT NULL
 );"""
 initial_tourneystate_table = [("Not Started",), ("In Progress",), ("Completed",)]
+insert_tourneystate_cmd = """INSERT INTO tourneystates (state) VALUES (?)"""
 
 create_tournaments_table = """CREATE TABLE IF NOT EXISTS tournaments (
     id              INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -93,6 +99,7 @@ create_tournaments_table = """CREATE TABLE IF NOT EXISTS tournaments (
 
 create_tournament_teams_table = """CREATE TABLE IF NOT EXISTS tournament_teams (
     id         INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    bb_ver     INTEGER NOT NULL,
     tourney_id INTEGER NOT NULL,
     team_id    INTEGER NOT NULL,
     FOREIGN KEY (tourney_id) REFERENCES tournaments (id),
@@ -108,9 +115,11 @@ create_gamestates_table = """CREATE TABLE IF NOT EXISTS gamestates (
     state TEXT NOT NULL
 );"""
 initial_gamestate_table = [("Unplayed",), ("Played",), ("Concession",)]
+insert_gamestate_cmd = """INSERT INTO gamestates (state) VALUES (?)"""
 
 create_games_table = """CREATE TABLE IF NOT EXISTS games (
     id            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    bb_ver        INTEGER NOT NULL,
     tourney_id    INTEGER NOT NULL,
     round_num     INTEGER NOT NULL,
     home_id       INTEGER NOT NULL,

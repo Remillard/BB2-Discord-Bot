@@ -244,7 +244,7 @@ class Schedule(list):
 
 ################################################################################
 class TourneyFile:
-    """Class encapculations interactions with the YAML file.  No one outside
+    """Class encapsulates interactions with the YAML file.  No one outside
     of this class ought to be exposed to THE BLOB."""
 
     def __init__(self, filename):
