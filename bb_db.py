@@ -37,13 +37,15 @@ class DBFile:
         :param str sql_cmd: The SQL command to be executed as a string.
         :param sql_val: The values associated with the SQL command.
         :type sql_val: tuple or None
+        :return: Returns the list result of fetchall() against the command.  This list may be empty.
         """
         try:
             with self.conn:
                 if sql_val is not None:
-                    self.conn.execute(sql_cmd, sql_val)
+                    c = self.conn.execute(sql_cmd, sql_val)
                 else:
-                    self.conn.execute(sql_cmd)
+                    c = self.conn.execute(sql_cmd)
+                return c.fetchall()
         except Error as e:
             print(e)
         self.conn.commit()

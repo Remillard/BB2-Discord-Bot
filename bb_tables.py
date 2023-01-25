@@ -22,6 +22,10 @@ class Coach:
     """
 
     def __init__(self, bb_name, d_name):
+        """
+        :param str bb_name: The in-game name of the Blood Bowl coach.
+        :param str d_name: The Discord name of the coach in name#number format.
+        """
         self.bb_name = bb_name
         self.d_name = d_name.split("#")[0]
         self.d_num = d_name.split("#")[1]
@@ -31,7 +35,7 @@ class Coach:
         """
         Receives a string containing comma separated values of the in-game
         coach name and the Discord user name.  Splits the string and returns a
-        class object.
+        Coach object.
 
         :classmethod:
         :param str coach_str: The coach information in a CSV string, containing an in-game name and Discord name.
@@ -40,6 +44,27 @@ class Coach:
         """
         coach_list = coach_str.split(",")
         return cls(coach_list[0].lstrip(), coach_list[1].lstrip())
+
+    @classmethod
+    def from_record(cls, record):
+        """
+        Receives a tuple containing the objects retrieved from a SQL query
+        against the coach table.  Produces a Coach object.
+
+        :classmethod:
+        :param record: The tuple from a SQL query.
+        :rtype: Coach()
+        """
+        return cls(record[1], f"{record[2]}#{record[3]}")
+
+    def __str__(self):
+        """
+        String method automatically called when Python decides to try
+        to resolve the object as a string (for instance when used with print().)
+
+        :return str: Returns the class object presented as a string.
+        """
+        return f"{self.bb_name}, {self.d_name}#{self.d_num}"
 
 
 ################################################################################
@@ -67,6 +92,35 @@ class Coaches(DBTable):
         print(f"Adding record for {sqlval[0]}, {sqlval[1]}, {sqlval[2]}.")
         self.db_file.exec_sql(sqlcmd, sqlval)
 
+    def get_coach_by_id(self, id):
+        """
+        This method retrieves a coach record by selecting by the id field.
+
+        :param int id: The table id field representing the row to be retrieved.
+        :return: Returns a Coach object with the data from the record.
+        :rtype: Coach()
+        """
+        sqlcmd = sqlstr.get_coach_by_id_cmd
+        sqlval = (id,)
+        coach_list = self.db_file.exec_sql(sqlcmd, sqlval)
+        if coach_list:
+            # This is SUPPOSED to be a single object in this context, however
+            # there's no guarantee because exec_sql uses fetchall().  So
+            # in this method explicitly calling out the initial list record.
+            return Coach.from_record(coach_list[0])
+        else:
+            return None
+
+    def del_coach_by_id(self, id):
+        """
+        This method removes a coach record by selecting by the id field.
+
+        :param int id: The table id field representing the row to be deleted.
+        """
+        sqlcmd = sqlstr.delete_coach_by_id_cmd
+        sqlval = (id,)
+        self.db_file.exec_sql(sqlcmd, sqlval)
+
 
 ################################################################################
 def main():
@@ -85,6 +139,12 @@ def main():
         Bowl Coach Name, DiscordName#DiscordNum".
         Example: --add_coach "JohnnyBravo, jeremy#1234"''',
     )
+    parser.add_argument(
+        "--del_coach_by_id", help="""Deletes a coach record given the row id."""
+    )
+    parser.add_argument(
+        "--get_coach_by_id", help="""Prints out a coach record given the row id."""
+    )
     args = parser.parse_args()
 
     # Make conneciton to the database
@@ -92,6 +152,14 @@ def main():
 
     if args.add_coach:
         Coaches(db_file).add_coach(Coach.from_str(args.add_coach))
+    if args.del_coach_by_id:
+        Coaches(db_file).del_coach_by_id(int(args.del_coach_by_id))
+    if args.get_coach_by_id:
+        coach = Coaches(db_file).get_coach_by_id(int(args.get_coach_by_id))
+        if coach is not None:
+            print(coach)
+        else:
+            print("There is no coach with that id.")
 
 
 if __name__ == "__main__":

@@ -13,6 +13,12 @@ create_coaches_table = """CREATE TABLE IF NOT EXISTS coaches (
 insert_coach_cmd = (
     """INSERT INTO coaches (bb_name, discord_name, discord_id) VALUES (?, ?, ?) """
 )
+get_coach_by_id_cmd = (
+    """SELECT * FROM coaches WHERE id=?"""
+)
+delete_coach_by_id_cmd = (
+    """DELETE FROM coaches WHERE id=?"""
+)
 
 # Enumerated type for SQLite3
 # Examples include:
