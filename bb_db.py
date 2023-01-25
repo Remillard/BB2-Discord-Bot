@@ -17,6 +17,11 @@ class DBFile:
     """Class encapsulating the SQLite database file and initialization."""
 
     def __init__(self, filename):
+        """
+        Initialize a DBFile object with a connection.
+
+        :param str filename: The filename of the database to connect to.
+        """
         self.filename = filename
         try:
             self.conn = sqlite3.connect(self.filename)
@@ -26,7 +31,13 @@ class DBFile:
             print(f"Connection to {self.filename} created.")
 
     def exec_sql(self, sql_cmd, sql_val=None):
-        """Executes the SQL command passed to the method."""
+        """
+        Executes the SQL command passed to the method.
+
+        :param str sql_cmd: The SQL command to be executed as a string.
+        :param sql_val: The values associated with the SQL command.
+        :type sql_val: tuple or None
+        """
         try:
             with self.conn:
                 if sql_val is not None:
@@ -38,8 +49,10 @@ class DBFile:
         self.conn.commit()
 
     def init_tables(self):
-        """Initializes a brand new database with the desired tables as described
-        in the sql_strings module."""
+        """
+        Initializes a brand new database with the desired tables as described
+        in the sql_strings module.
+        """
         print("Creating table structure.")
         # Enumerated Type Tables
         self.exec_sql(sqlstr.create_races_table)
@@ -53,8 +66,10 @@ class DBFile:
         self.exec_sql(sqlstr.create_games_table)
 
     def init_enum_tables(self):
-        """Initializes new tables with table data that is intended to be used as
-        enumerated types (which SQLite doesn't have.)"""
+        """
+        Initializes new tables with table data that is intended to be used as
+        enumerated types (which SQLite doesn't have.)
+        """
         print("Filling enumerated state tables.")
 
         sqlcmd = sqlstr.insert_gamestate_cmd
@@ -63,7 +78,7 @@ class DBFile:
                 self.conn.executemany(sqlcmd, sqlstr.initial_gamestate_table)
         except Error as e:
             print(e)
-            
+
         sqlcmd = sqlstr.insert_race_cmd
         try:
             with self.conn:
@@ -83,36 +98,19 @@ class DBFile:
 
 ################################################################################
 class DBTable:
-    """Abstract class for a SQLite3 table for common functionality."""
+    """
+    Abstract class for a SQLite3 table for common functionality.
+    """
 
     def __init__(self, db_file):
         self.db_file = db_file
 
 
 ################################################################################
-# def add_coach(db_conn, coach):
-#     sqlcmd = sqlstr.insert_coach_cmd
-#     c = db_conn.cursor()
-#     c.execute(sqlcmd, coach)
-#     db_conn.commit()
-#     return c.lastrowid
-
-
-################################################################################
-# def get_all_coaches(db_conn):
-#     c = db_conn.cursor()
-#     c.execute("select * from coaches")
-#     rows = c.fetchall()
-#     for row in rows:
-#         print(row)
-
-
-################################################################################
 def main():
-    """Main command line entry point."""
-    #
-    # Command line arguments.
-    #
+    """
+    Main command line entry point.
+    """
     parser = argparse.ArgumentParser(
         prog="bb_db",
         description="Methods to create a Blood Bowl tournament database.",

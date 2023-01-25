@@ -1,5 +1,6 @@
 # Editor files
 *~
+.#*
 
 # Database files
 *.db
