@@ -24,6 +24,7 @@ def initialize_enum_tables(engine):
             session.add(tourstate)
         for item in sqlstr.initial_race_table:
             race = models.Race(name=item[0], bb2=item[1], bb3=item[2])
+            print(race)
             session.add(race)
         session.commit()
 

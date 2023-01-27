@@ -10,10 +10,17 @@ from sqlmodel import Field, Relationship, SQLModel
 # Enumerated Types Static Tables
 ################################################################################
 class Race(SQLModel, table=True):
+    __tablename__ = "races"
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str
     bb2: int
     bb3: int
+
+    def my_model_method(self):
+        print(f"Hi, I'm {self.name}.")
+
+    def __str__(self):
+        return f"Race: {self.name}.  Blood Bowl 2: {self.bb2}.  Blood Bowl 3:{self.bb3}"
 
 
 ################################################################################
@@ -43,7 +50,7 @@ class Team(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str
     bb_ver: int
-    race_id: int = Field(foreign_key="race.id")
+    race_id: int = Field(foreign_key="races.id")
     coach_id: int = Field(foreign_key="coach.id")
 
 
