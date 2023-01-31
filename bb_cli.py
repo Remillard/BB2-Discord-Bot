@@ -24,6 +24,12 @@ def main():
         help="""Deletes the specified database if it exists and recreates the
         database initial state including enumerated tables.""",
     )
+    parser.add_argument(
+        "--add_coach",
+        help='''Should have a parameter of a quoted string of a comma-separated
+        list of values in the order: Discord Name, BB2 Coach Name, BB3 Coach Name.
+        Example: "Remi#2160, Remillard, Remi"'''
+    )
     args = parser.parse_args()
 
     if args.initialize:
@@ -44,6 +50,9 @@ def main():
     else:
         my_engine = engine.initialize_engine(args.filename)
         engine.initialize_tables(my_engine)
+
+    if args.add_coach:
+        engine.add_coach(my_engine, args.add_coach)
 
 
 if __name__ == "__main__":

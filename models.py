@@ -30,6 +30,21 @@ class Coach(Base):
     bb2_name: Mapped[Optional[str]] = mapped_column(String)
     bb3_name: Mapped[Optional[str]] = mapped_column(String)
 
+    @classmethod
+    def from_str(cls, coach_str):
+        """
+        Receives a string containing comma separated values of the in-game
+        coach name and the Discord user name.  Splits the string and returns a
+        Coach object.
+
+        :classmethod:
+        :param str coach_str: The coach information in a CSV string, containing an in-game name and Discord name.
+        :return: Returns an object of the Coach class.
+        :rtype: Coach()
+        """
+        coach_list = coach_str.split(",")
+        return cls(d_name=coach_list[0].lstrip(), bb2_name=coach_list[1].lstrip(), bb3_name=coach_list[2].lstrip())
+
 
 class Team(Base):
     __tablename__ = "teams"
