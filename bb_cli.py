@@ -15,13 +15,15 @@ import engine
 cli = typer.Typer()
 
 
+################################################################################
+# Initialization Command
 @cli.command()
 def initialize(filename: str = "bb.db"):
-    '''
+    """
     Initializes the database with tables and auto-filled static tables.  If the
     database already exists, a confirmation whether to delete the database and
     recreate must be answered.
-    '''
+    """
     if os.path.exists(filename):
         console = Console()
         answer = console.input(
@@ -31,8 +33,7 @@ def initialize(filename: str = "bb.db"):
             rprint("[bold red]Deleting specified database.[/]")
             os.remove(filename)
         else:
-            rprint("[bold blue]Exiting.[/]")
-            raise typer.Exit()
+            raise typer.Abort()
 
     my_engine = engine.initialize_engine(filename)
     engine.initialize_tables(my_engine)
@@ -40,13 +41,15 @@ def initialize(filename: str = "bb.db"):
     rprint("[bold green]Completed setup of database.[/]")
 
 
-@cli.command()
+################################################################################
+# Add Coach Command
+@cli.command("add_coach")
 def add_coach(coach_csv: str, filename: str = "bb.db"):
-    '''
+    """
     Command adds a coach record to the database.  The record should be
     a comma separated list as a quoted string.  The order of records is:
     "<Discord name>, <Blood Bowl 2 in-game name>, <Blood Bowl 3 in-game name>"
-    '''
+    """
     my_engine = engine.initialize_engine(filename)
     engine.initialize_tables(my_engine)
     engine.add_coach(my_engine, coach_csv)
