@@ -42,8 +42,13 @@ class Coach(Base):
         :return: Returns an object of the Coach class.
         :rtype: Coach()
         """
-        coach_list = coach_str.split(",")
-        return cls(d_name=coach_list[0].lstrip(), bb2_name=coach_list[1].lstrip(), bb3_name=coach_list[2].lstrip())
+        # Splits the Coach string, removes whitespace, and converts nulls to None.
+        
+        coach_list = [str(i.lstrip()) or None for i in  coach_str.split(",")]
+        return cls(d_name=coach_list[0], bb2_name=coach_list[1], bb3_name=coach_list[2])
+
+    def __repr__(self) -> str:
+        return f"Coach(id={self.id}, d_name={self.d_name}, bb2_name={self.bb2_name}, bb3_name={self.bb3_name})"
 
 
 class Team(Base):

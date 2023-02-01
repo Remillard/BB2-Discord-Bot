@@ -55,5 +55,19 @@ def add_coach(coach_csv: str, filename: str = "bb.db"):
     engine.add_coach(my_engine, coach_csv)
 
 
+################################################################################
+# Find Coach Command
+@cli.command("find_coach")
+def find_coach(d_name: str, filename: str = "bb.db"):
+    """
+    Command adds a coach record to the database.  The record should be
+    a comma separated list as a quoted string.  The order of records is:
+    "<Discord name>, <Blood Bowl 2 in-game name>, <Blood Bowl 3 in-game name>"
+    """
+    my_engine = engine.initialize_engine(filename)
+    engine.initialize_tables(my_engine)
+    engine.find_coach(my_engine, d_name)
+
+
 if __name__ == "__main__":
     cli()
