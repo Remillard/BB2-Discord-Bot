@@ -56,6 +56,20 @@ def add_coach(coach_csv: str, filename: str = "bb.db"):
 
 
 ################################################################################
+# Add Team Command
+@cli.command("add_team")
+def add_team(team_csv: str, filename: str = "bb.db"):
+    """
+    Command adds a team record to the database.  The record should be
+    a comma separated list as a quoted string.  The order of records is:
+    "<Discord name>, <Team Name>, <Race Name>"
+    """
+    my_engine = engine.initialize_engine(filename)
+    engine.initialize_tables(my_engine)
+    engine.add_team(my_engine, team_csv)
+
+
+################################################################################
 # Find Coach Command
 @cli.command("find_coach")
 def find_coach(d_name: str, filename: str = "bb.db"):
