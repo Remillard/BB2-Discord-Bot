@@ -1,28 +1,35 @@
-# BB2-Discord-Bot
-A Discord Bot for handling casual Blood Bowl 2 tournament information
+* BB2-Discord-Bot
 
-## TODO
-* List all games -- CLI Only
-* List all games in the current week -- CLI and Bot -- DONE!
-* List all games for a team across all weeks
-* List all teams -- CLI Only
-* Add teams -- CLI Only
-* Delete teams -- CLI Only
-* Update teams -- CLI Only
-* Update schedule -- CLI Only
-* Add game results -- CLI Only
-* Implement trivia selector and trivia file -- CLI and Bot -- DONE!
-* Implement silly dice rolling method for the Bot -- DONE!
-* Implement Discord API Bot -- DONE!
+A Discord Bot for handling casual Blood Bowl 2 tournament
 
-## Thanks and Attribution
-The bulk of the trivia file was taken from the
-[Lore of Nuffle](http://loreofnuffle.talkfantasyfootball.org/) where many of
-the sourcebook tidbits has been compiled (along with additions.)  Many thanks
-to Ithilkir of TalkFantasyFootball forums for putting that together (along with
+* TODO SQLite DB Variation
+- [X] Implement initial table creation with SQLAlchemy.
+- [X] Implement CLI tools.
+- [X] Implement initial coach adding method.
+- [ ] Check if coach exists before adding.
+- [ ] Create coach retrieval method.  Use fuzzy finding
+  - Try SQLAlchemy =ilike= method to see how it renders for SQLite.
+- [ ] Create race retrieval method.
+- [ ] Create team adding method.
+  - Use coach retrieval to link tables.
+  - Use race retrieval to link tables.
+- [ ] Create team retrieval method.
+- [ ] Create team report 
+
+* TODO Prior capability retained.
+- [X] Implement trivia selector and trivia file -- CLI and Bot
+- [X] Implement silly dice rolling method for the Bot
+- [X] Implement Discord API Bot
+
+* Thanks and Attribution
+
+The bulk of the trivia file was taken from the [Lore of
+Nuffle](http://loreofnuffle.talkfantasyfootball.org/) where many of the
+sourcebook tidbits has been compiled (along with additions.)  Many thanks to
+Ithilkir of TalkFantasyFootball forums for putting that together (along with
 Khenian and Torpor of same).  I tried to get a hold of Ithilkir at the forums
 however the site would not mail me the "email verification" after several
-attempts so I have given up for now.  Hopefully attribution will be
-sufficient!  Also many thanks to Games Workshop for a fun tactical (and silly)
-football variant!
+attempts so I have given up for now.  Hopefully attribution will be sufficient!
+Also many thanks to Games Workshop for a fun tactical (and silly) football
+variant!
 

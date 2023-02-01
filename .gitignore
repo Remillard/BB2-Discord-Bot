@@ -5,6 +5,10 @@
 # Database files
 *.db
 
+# HTML files (probably ORG export)
+*.html
+*.htm
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -138,5 +142,4 @@ dmypy.json
 *.sublime-workspace
 
 BB2 Discord Bot.code-workspace
-
 .vscode/
