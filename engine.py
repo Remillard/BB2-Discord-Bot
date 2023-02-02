@@ -108,11 +108,15 @@ def add_team(engine, team_csv):
 
 
 def get_all_coaches(engine):
+    coach_list=[]
     with Session(engine) as session:
         stmt = select(models.Coach)
         result = session.execute(stmt)
+        # The result object must be used before the session ends as it becomes
+        # invalid at that point.
         for coach_obj in result.scalars():
-            print(coach_obj)
+            coach_list.append(coach_obj)
+    return coach_list
 
 # NOTES: This SQL command lists teams and coaches:
 # select teams.id, teams.name, coaches.d_name from teams inner join coaches on coaches.id=teams.coach_id;

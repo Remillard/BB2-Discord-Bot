@@ -8,13 +8,21 @@ A Discord Bot for handling casual Blood Bowl 2 tournament
 - [X] Implement initial coach adding method.
 - [X] Check if coach exists before adding.
 - [ ] Create coach retrieval method.  Use fuzzy finding
+  - Currently requires exact Discord Name
   - Try SQLAlchemy =ilike= method to see how it renders for SQLite.
-- [ ] Create race retrieval method.
-- [ ] Create team adding method.
+- [X] Create race retrieval method.
+- [X] Create coach list report
+- [X] Create team adding method.
   - Use coach retrieval to link tables.
   - Use race retrieval to link tables.
 - [ ] Create team retrieval method.
-- [ ] Create team report 
+- [ ] Create team report
+- [ ] Create tournament adding method
+- [ ] Create way of adding teams to tournament
+- [ ] Create way of adding games to tournament based on the teams in the tournament.
+- [ ] Create tournament report
+- [ ] Create games reports
+- [ ] Adjust Bot commands to match all the CLI commands.
 
 * TODO Prior capability retained.
 - [X] Implement trivia selector and trivia file -- CLI and Bot

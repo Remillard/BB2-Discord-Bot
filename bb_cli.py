@@ -4,8 +4,12 @@
 ################################################################################
 import os
 import typer
-from rich import print as rprint
+from rich import print
+from rich import box
 from rich.console import Console
+from rich.prompt import Prompt
+from rich.prompt import Confirm
+from rich.table import Table
 
 import models
 import engine
@@ -25,12 +29,8 @@ def initialize(filename: str = "bb.db"):
     recreate must be answered.
     """
     if os.path.exists(filename):
-        console = Console()
-        answer = console.input(
-            f"[bold red]Are you VERY sure you wish to delete {filename} and recreate?  Type YES to continue, any other input to exit:[/] "
-        )
-        if answer == "YES":
-            rprint("[bold red]Deleting specified database.[/]")
+        if Confirm.ask(f"[bold red]Are you VERY sure you wish to delete {filename} and recreate?[/]", default=False):
+            print("[bold red]Deleting specified database.[/]")
             os.remove(filename)
         else:
             raise typer.Abort()
@@ -38,7 +38,7 @@ def initialize(filename: str = "bb.db"):
     my_engine = engine.initialize_engine(filename)
     engine.initialize_tables(my_engine)
     engine.initialize_race_table(my_engine)
-    rprint("[bold green]Completed setup of database.[/]")
+    print("[bold green]Completed setup of database.[/]")
 
 
 ################################################################################
@@ -71,17 +71,25 @@ def add_team(team_csv: str, filename: str = "bb.db"):
 
 ################################################################################
 # Find Coach Command
-@cli.command("find_coach")
-def find_coach(d_name: str, filename: str = "bb.db"):
+@cli.command("report_coaches")
+def report_coaches(filename: str = "bb.db"):
     """
-    Command adds a coach record to the database.  The record should be
-    a comma separated list as a quoted string.  The order of records is:
-    "<Discord name>, <Blood Bowl 2 in-game name>, <Blood Bowl 3 in-game name>"
+    Prints a table of the coaches table.
     """
     my_engine = engine.initialize_engine(filename)
     engine.initialize_tables(my_engine)
-    engine.find_coach(my_engine, d_name)
+    rows = engine.get_all_coaches(my_engine)
+    table = Table(title="Blood Bowl Coach List", safe_box=True, box=box.ROUNDED)
+    table.add_column("ID", justify="right", no_wrap=True)
+    table.add_column("Discord", justify="right", no_wrap=True)
+    table.add_column("BB2 Coach", justify="right", no_wrap=True)
+    table.add_column("BB3 Coach", justify="right", no_wrap=True)
+    for row in rows:
+        table.add_row(str(row.id), row.d_name, row.bb2_name, row.bb3_name)
+    console = Console()
+    console.print(table)
 
 
 if __name__ == "__main__":
     cli()
+ 
