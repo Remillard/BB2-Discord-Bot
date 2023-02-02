@@ -1,13 +1,13 @@
 * BB2-Discord-Bot
 
-A Discord Bot for handling casual Blood Bowl 2 tournament
+A Discord Bot for handling casual Blood Bowl tournaments
 
 * TODO SQLite DB Variation
 - [X] Implement initial table creation with SQLAlchemy.
 - [X] Implement CLI tools.
 - [X] Implement initial coach adding method.
 - [X] Check if coach exists before adding.
-- [ ] Create coach retrieval method.  Use fuzzy finding
+- [X] Create coach retrieval method.  Use fuzzy finding
   - Currently requires exact Discord Name
   - Try SQLAlchemy =ilike= method to see how it renders for SQLite.
 - [X] Create race retrieval method.

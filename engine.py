@@ -2,6 +2,9 @@ from sqlalchemy import create_engine
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from rich import print
+from rich.prompt import Confirm
+
 import models
 import sql_strings as sqlstr
 
@@ -49,27 +52,59 @@ def add_coach(engine, coach_csv):
     """
     # Determine first if the coach may already exist in the database.
     this_coach = models.Coach.from_str(coach_csv)
-    if find_coach(engine, this_coach.d_name) is None:
+    if find_coach(engine, this_coach.d_name, fuzzy=False) is None:
         with Session(engine) as session:
             session.add(this_coach)
             session.commit()
     else:
-        print("Coach already exists!  Nothing added to database.")
+        print(f"[bold red]Coach {this_coach.d_name} already exists.  Nothing added to database![/]")
 
 
-def find_coach(engine, d_name):
+def find_coach(engine, d_name, fuzzy=True):
     """
-    Receives the engine and a Discord name (these are required and must
-    be unique) and produces the first record that matches, or returns None.
+    Receives the engine and a possible Discord name.  The method will first
+    assume that the name is exact and will search for it and return the first
+    record (this column must be unique).  If that fails, the method will assume
+    the text is a fragment and try to find record(s) matching.  If no match is
+    found, an exception is raised.  If a single match is found, that one will be
+    returned.  If more than one match is found, the CLI will be queried for each
+    match.  If none of the matches are chosen as correct, an exception is
+    raised.
 
     :param engine: An object from SQLAlchemy create_engine method.
     :param str d_name: The Discord name of a coach.
-    :return: A SQLAlchemy Result object.
+    :param bool fuzzy: A boolean that represents whether fuzzy finding is accepted.
+    :return: A tuple containing a Coach object as its only member.
     """
     with Session(engine) as session:
         stmt = select(models.Coach).where(models.Coach.d_name == d_name)
         coach = session.execute(stmt).first()
-        return coach
+        if not fuzzy:
+            return coach
+        else:
+            if coach is not None:
+                print("[green]Found exact coach match![/]")
+                return coach
+            else:
+                print("[bold red]Exact match failed.  Trying fuzzy match.[/]")
+                stmt = select(models.Coach).where(models.Coach.d_name.like(f"%{d_name}%"))
+                # The coaches result is a list of tuples.  Each tuple contains one table
+                # object.  This is important for the referencing below because it's
+                # fucking maddening.  We return the tuple.
+                coaches = session.execute(stmt).all()
+                if coaches is None:
+                    raise KeyError(f'Could not find the coach name string: "{d_name}".')
+                elif len(coaches) == 1:
+                    print(f"[green]{len(coaches)} record matches.  Using {coaches[0][0].d_name}.[/]")
+                    return coaches[0]
+                else:
+                    print(f"[bold red]{len(coaches)} records match.[/]")
+                    for row in coaches:
+                        if Confirm.ask(f"[cyan]Select {row[0].d_name}?", default=False):
+                            print(f"[green]Using {row[0].d_name}.")
+                            return row
+                    else:
+                        raise KeyError(f'Could not find the coach name string "{d_name}".')
 
 
 def find_race(engine, race):
@@ -108,7 +143,7 @@ def add_team(engine, team_csv):
 
 
 def get_all_coaches(engine):
-    coach_list=[]
+    coach_list = []
     with Session(engine) as session:
         stmt = select(models.Coach)
         result = session.execute(stmt)
@@ -117,6 +152,7 @@ def get_all_coaches(engine):
         for coach_obj in result.scalars():
             coach_list.append(coach_obj)
     return coach_list
+
 
 # NOTES: This SQL command lists teams and coaches:
 # select teams.id, teams.name, coaches.d_name from teams inner join coaches on coaches.id=teams.coach_id;

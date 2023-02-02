@@ -66,8 +66,10 @@ def add_team(team_csv: str, filename: str = "bb.db"):
     """
     my_engine = engine.initialize_engine(filename)
     engine.initialize_tables(my_engine)
-    engine.add_team(my_engine, team_csv)
-
+    try:
+        engine.add_team(my_engine, team_csv)
+    except Exception as e:
+        print(e)
 
 ################################################################################
 # Find Coach Command
@@ -88,6 +90,12 @@ def report_coaches(filename: str = "bb.db"):
         table.add_row(str(row.id), row.d_name, row.bb2_name, row.bb3_name)
     console = Console()
     console.print(table)
+
+@cli.command("test_method")
+def test_method(d_name: str, filename: str = "bb.db"):
+    my_engine = engine.initialize_engine(filename)
+    engine.initialize_tables(my_engine)
+    engine.test_stuff(my_engine, d_name)
 
 
 if __name__ == "__main__":

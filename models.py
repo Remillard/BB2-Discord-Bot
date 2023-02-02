@@ -94,6 +94,7 @@ class Tournament(Base):
     __tablename__ = "tournaments"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
+    bb_ver: Mapped[int] = mapped_column(Integer, nullable=False)
     num_teams: Mapped[int] = mapped_column(Integer)
     num_rounds: Mapped[int] = mapped_column(Integer)
     current_round: Mapped[int] = mapped_column(Integer)
