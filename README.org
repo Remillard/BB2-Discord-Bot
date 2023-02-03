@@ -16,7 +16,7 @@ A Discord Bot for handling casual Blood Bowl tournaments
   - Use coach retrieval to link tables.
   - Use race retrieval to link tables.
 - [ ] Create team retrieval method.
-- [ ] Create team report
+- [X] Create team report
 - [ ] Create tournament adding method
 - [ ] Create way of adding teams to tournament
 - [ ] Create way of adding games to tournament based on the teams in the tournament.

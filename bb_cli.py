@@ -29,7 +29,10 @@ def initialize(filename: str = "bb.db"):
     recreate must be answered.
     """
     if os.path.exists(filename):
-        if Confirm.ask(f"[bold red]Are you VERY sure you wish to delete {filename} and recreate?[/]", default=False):
+        if Confirm.ask(
+            f"[bold red]Are you VERY sure you wish to delete {filename} and recreate?[/]",
+            default=False,
+        ):
             print("[bold red]Deleting specified database.[/]")
             os.remove(filename)
         else:
@@ -71,6 +74,7 @@ def add_team(team_csv: str, filename: str = "bb.db"):
     except Exception as e:
         print(e)
 
+
 ################################################################################
 # Find Coach Command
 @cli.command("report_coaches")
@@ -82,7 +86,7 @@ def report_coaches(filename: str = "bb.db"):
     engine.initialize_tables(my_engine)
     rows = engine.get_all_coaches(my_engine)
     table = Table(title="Blood Bowl Coach List", safe_box=True, box=box.ROUNDED)
-    table.add_column("ID", justify="right", no_wrap=True)
+    table.add_column("Coach ID", justify="right", no_wrap=True)
     table.add_column("Discord", justify="right", no_wrap=True)
     table.add_column("BB2 Coach", justify="right", no_wrap=True)
     table.add_column("BB3 Coach", justify="right", no_wrap=True)
@@ -91,13 +95,32 @@ def report_coaches(filename: str = "bb.db"):
     console = Console()
     console.print(table)
 
-@cli.command("test_method")
-def test_method(d_name: str, filename: str = "bb.db"):
+
+@cli.command("report_teams")
+def report_teams(filename: str = "bb.db"):
+    """
+    Prints a table of the teams table crossed with the coaches and races.
+    """
     my_engine = engine.initialize_engine(filename)
     engine.initialize_tables(my_engine)
-    engine.test_stuff(my_engine, d_name)
+    rows = engine.get_all_teams(my_engine)
+    table = Table(title="Blood Bowl Team List", safe_box=True, box=box.ROUNDED)
+    table.add_column("Team ID", justify="right", no_wrap=True)
+    table.add_column("Team Name", justify="right", no_wrap=True)
+    table.add_column("Race", justify="right", no_wrap=True)
+    table.add_column("Coach", justify="right", no_wrap=True)
+    for row in rows:
+        table.add_row(str(row[0]), row[1], row[2], row[3])
+    console = Console()
+    console.print(table)
+
+
+@cli.command("test_method")
+def test_method(filename: str = "bb.db"):
+    my_engine = engine.initialize_engine(filename)
+    engine.initialize_tables(my_engine)
+    engine.get_all_teams(my_engine)
 
 
 if __name__ == "__main__":
     cli()
- 

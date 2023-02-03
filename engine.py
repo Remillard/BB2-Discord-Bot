@@ -57,7 +57,9 @@ def add_coach(engine, coach_csv):
             session.add(this_coach)
             session.commit()
     else:
-        print(f"[bold red]Coach {this_coach.d_name} already exists.  Nothing added to database![/]")
+        print(
+            f"[bold red]Coach {this_coach.d_name} already exists.  Nothing added to database![/]"
+        )
 
 
 def find_coach(engine, d_name, fuzzy=True):
@@ -87,7 +89,9 @@ def find_coach(engine, d_name, fuzzy=True):
                 return coach
             else:
                 print("[bold red]Exact match failed.  Trying fuzzy match.[/]")
-                stmt = select(models.Coach).where(models.Coach.d_name.like(f"%{d_name}%"))
+                stmt = select(models.Coach).where(
+                    models.Coach.d_name.like(f"%{d_name}%")
+                )
                 # The coaches result is a list of tuples.  Each tuple contains one table
                 # object.  This is important for the referencing below because it's
                 # fucking maddening.  We return the tuple.
@@ -95,7 +99,9 @@ def find_coach(engine, d_name, fuzzy=True):
                 if coaches is None:
                     raise KeyError(f'Could not find the coach name string: "{d_name}".')
                 elif len(coaches) == 1:
-                    print(f"[green]{len(coaches)} record matches.  Using {coaches[0][0].d_name}.[/]")
+                    print(
+                        f"[green]{len(coaches)} record matches.  Using {coaches[0][0].d_name}.[/]"
+                    )
                     return coaches[0]
                 else:
                     print(f"[bold red]{len(coaches)} records match.[/]")
@@ -104,7 +110,9 @@ def find_coach(engine, d_name, fuzzy=True):
                             print(f"[green]Using {row[0].d_name}.")
                             return row
                     else:
-                        raise KeyError(f'Could not find the coach name string "{d_name}".')
+                        raise KeyError(
+                            f'Could not find the coach name string "{d_name}".'
+                        )
 
 
 def find_race(engine, race):
@@ -156,3 +164,17 @@ def get_all_coaches(engine):
 
 # NOTES: This SQL command lists teams and coaches:
 # select teams.id, teams.name, coaches.d_name from teams inner join coaches on coaches.id=teams.coach_id;
+def get_all_teams(engine):
+    team_list = []
+    with Session(engine) as session:
+        stmt = (
+            select(models.Team, models.Coach, models.Race)
+            .join(models.Coach)
+            .join(models.Race)
+        )
+        result = session.execute(stmt)
+        for obj in result:
+            team_list.append(
+                [obj.Team.id, obj.Team.name, obj.Race.name, obj.Coach.d_name]
+            )
+    return team_list

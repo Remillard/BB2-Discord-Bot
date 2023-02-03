@@ -47,8 +47,8 @@ class Coach(Base):
         coach_list = [str(i.lstrip()) or None for i in  coach_str.split(",")]
         return cls(d_name=coach_list[0], bb2_name=coach_list[1], bb3_name=coach_list[2])
 
-    def __repr__(self) -> str:
-        return f"Coach(id={self.id}, d_name={self.d_name}, bb2_name={self.bb2_name}, bb3_name={self.bb3_name})"
+    # def __repr__(self) -> str:
+    #     return f"Coach(id={self.id}, d_name={self.d_name}, bb2_name={self.bb2_name}, bb3_name={self.bb3_name})"
 
 
 class Team(Base):
@@ -74,8 +74,8 @@ class Team(Base):
         team_list = [str(i.lstrip()) or None for i in  team_str.split(",")]
         return cls(name=team_list[0], coach_id=team_list[1], race_id=team_list[2])
 
-    def __repr__(self) -> str:
-        return f"Team(id={self.id}, name={self.name}, coach_id={self.coach_id}, race_id={self.race_id})"
+    # def __repr__(self) -> str:
+    #     return f"Team(id={self.id}, name={self.name}, coach_id={self.coach_id}, race_id={self.race_id})"
 
 
 class GameState(enum.Enum):
