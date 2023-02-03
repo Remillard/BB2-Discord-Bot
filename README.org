@@ -10,19 +10,23 @@ A Discord Bot for handling casual Blood Bowl tournaments
 - [X] Create coach retrieval method.  Use fuzzy finding
   - Currently requires exact Discord Name
   - Try SQLAlchemy =ilike= method to see how it renders for SQLite.
+  - SQLlite3 does not have =ilike=.  Used =*.where(model_field.like(str))= instead.
 - [X] Create race retrieval method.
   - Added fuzzy find code similar to coach name.
+  - WARNING: Since there is a Chaos team, it matches a lot of "Chaos <name>" teams too.
 - [X] Create coach list report
 - [X] Create team adding method.
   - Use coach retrieval to link tables.
   - Use race retrieval to link tables.
-- [ ] Create team retrieval method.
+  - Added game version to table definition and updated methods.
 - [X] Create team report
 - [ ] Create tournament adding method
 - [ ] Create way of adding teams to tournament
 - [ ] Create way of adding games to tournament based on the teams in the tournament.
 - [ ] Create tournament report
 - [ ] Create games reports
+- [ ] Create team retrieval method.
+  - Not sure this is high priority.  Should be able to get from JOINs.
 - [ ] Adjust Bot commands to match all the CLI commands.
 
 * TODO Prior capability retained.

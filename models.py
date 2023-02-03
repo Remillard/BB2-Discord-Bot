@@ -47,35 +47,38 @@ class Coach(Base):
         coach_list = [str(i.lstrip()) or None for i in  coach_str.split(",")]
         return cls(d_name=coach_list[0], bb2_name=coach_list[1], bb3_name=coach_list[2])
 
-    # def __repr__(self) -> str:
-    #     return f"Coach(id={self.id}, d_name={self.d_name}, bb2_name={self.bb2_name}, bb3_name={self.bb3_name})"
+    def __repr__(self) -> str:
+        return f"Coach(id={self.id}, d_name={self.d_name}, bb2_name={self.bb2_name}, bb3_name={self.bb3_name})"
 
 
 class Team(Base):
     __tablename__ = "teams"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
+    bb_ver: Mapped[int] = mapped_column(Integer, nullable=False)
     coach_id: Mapped[int] = mapped_column(ForeignKey("coaches.id"))
     race_id: Mapped[int] = mapped_column(ForeignKey("races.id"))
     
     @classmethod
     def from_str(cls, team_str):
         """
-        Receives a string containing comma separated values of the team name, the coach_id,
-        and the race id.  This is probably not that useful a construction as we'd like to have the
-        id values get filled in from queries.
+        Receives a string containing comma separated values of the team
+        name, the game version, the coach_id, and the race id.  This is probably
+        not that useful a construction as we'd like to have the id values get
+        filled in from queries.
 
         :classmethod:
         :param str team_str: The team information in a CSV string.
         :return: Returns an object of the Team class.
         :rtype: Team()
-        """
-        # Splits the Team string, removes whitespace, and converts nulls to None.
-        team_list = [str(i.lstrip()) or None for i in  team_str.split(",")]
-        return cls(name=team_list[0], coach_id=team_list[1], race_id=team_list[2])
 
-    # def __repr__(self) -> str:
-    #     return f"Team(id={self.id}, name={self.name}, coach_id={self.coach_id}, race_id={self.race_id})"
+        """
+        # Splits the Team string, removes whitespace, and converts nulls to None object.
+        team_list = [str(i.lstrip()) or None for i in  team_str.split(",")]
+        return cls(name=team_list[0], bb_ver=team_list[1], coach_id=team_list[2], race_id=team_list[3])
+
+    def __repr__(self) -> str:
+        return f"Team(id={self.id}, name={self.name}, coach_id={self.coach_id}, race_id={self.race_id})"
 
 
 class GameState(enum.Enum):

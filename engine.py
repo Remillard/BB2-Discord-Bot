@@ -165,7 +165,8 @@ def find_race(engine, r_name, fuzzy=True):
 def add_team(engine, team_csv):
     """
     Receives the engine and a CSV string of coach Discord Name, Team Name,
-    and Race, and creates a record in the Team table.
+    Race, and Game Version and creates a record in the Team table.
+    "<coach_name>, <team_name>, <race_name>, <version (2 or 3)>"
 
     :param engine: An object from SQLAlchemy create_engine method.
     :param str team_str: A string with comma separated values for the fields.
@@ -174,7 +175,7 @@ def add_team(engine, team_csv):
     coach = find_coach(engine, team_list[0])
     race = find_race(engine, team_list[2])
     if coach is not None and race is not None:
-        team = models.Team(name=team_list[1], coach_id=coach[0].id, race_id=race[0].id)
+        team = models.Team(name=team_list[1], bb_ver=team_list[3], coach_id=coach[0].id, race_id=race[0].id)
         with Session(engine) as session:
             session.add(team)
             session.commit()
@@ -207,6 +208,6 @@ def get_all_teams(engine):
         result = session.execute(stmt)
         for obj in result:
             team_list.append(
-                [obj.Team.id, obj.Team.name, obj.Race.name, obj.Coach.d_name]
+                [obj.Team.id, obj.Team.name, obj.Race.name, obj.Team.bb_ver, obj.Coach.d_name]
             )
     return team_list

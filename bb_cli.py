@@ -108,9 +108,10 @@ def report_teams(filename: str = "bb.db"):
     table.add_column("Team ID", justify="right", no_wrap=True)
     table.add_column("Team Name", justify="right", no_wrap=True)
     table.add_column("Race", justify="right", no_wrap=True)
+    table.add_column("BB Version", justify="right", no_wrap=True)
     table.add_column("Coach", justify="right", no_wrap=True)
     for row in rows:
-        table.add_row(str(row[0]), row[1], row[2], row[3])
+        table.add_row(str(row[0]), row[1], row[2], str(row[3]), row[4])
     console = Console()
     console.print(table)
 
