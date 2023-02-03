@@ -11,6 +11,7 @@ A Discord Bot for handling casual Blood Bowl tournaments
   - Currently requires exact Discord Name
   - Try SQLAlchemy =ilike= method to see how it renders for SQLite.
 - [X] Create race retrieval method.
+  - Added fuzzy find code similar to coach name.
 - [X] Create coach list report
 - [X] Create team adding method.
   - Use coach retrieval to link tables.

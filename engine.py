@@ -115,19 +115,51 @@ def find_coach(engine, d_name, fuzzy=True):
                         )
 
 
-def find_race(engine, race):
+def find_race(engine, r_name, fuzzy=True):
     """
-    Receives the engine and a racial name and produces the first record
-    that matches, or returns None.
+    Receives the engine and a possible racial name along with a boolean that
+    sets whether or not the fuzzy finding method is used.  The method will first
+    search for an exact match.  If that fails, the method will assume the text
+    is a fragment and try to find records(s) matching.  If no match is found, an
+    exception is raised.  If a single match is found, that one will be returned.
+    If more than one match is found, the CLI will be queried for each match.  If
+    none of the matches are chosen as correct, an exception is raised.
 
     :param engine: An object from SQLAlchemy create_engine method.
     :param str race: The name of the team race.
     :return: A SQLAlchemy Result object.
+
     """
     with Session(engine) as session:
-        stmt = select(models.Race).where(models.Race.name == race)
+        stmt = select(models.Race).where(models.Race.name == r_name)
         race = session.execute(stmt).first()
-        return race
+        if not fuzzy:
+            return race
+        else:
+            if race is not None:
+                print("[green]Found exact race match![/]")
+                return race
+            else:
+                print("[bold red]Exact match failed.  Trying fuzzy match.[/]")
+                stmt = select(models.Race).where(models.Race.name.like(f"%{r_name}%"))
+                races = session.execute(stmt).all()
+                if races is None:
+                    raise KeyError(f'Could not find the race name string: "{r_name}".')
+                elif len(races) == 1:
+                    print(
+                        f"[green]{len(races)} record matches.  Using {races[0][0].name}.[/]"
+                    )
+                    return races[0]
+                else:
+                    print(f"[bold red]{len(races)} record matches.[/]")
+                    for row in races:
+                        if Confirm.ask(f"[cyan]Select {row[0].name}?", default=False):
+                            print(f"[green]Using {row[0].name}.")
+                            return row
+                    else:
+                        raise KeyError(
+                            f'Could not find the race name string "{r_name}".'
+                        )
 
 
 def add_team(engine, team_csv):
