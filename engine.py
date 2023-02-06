@@ -235,8 +235,6 @@ def get_all_coaches(engine):
     return coach_list
 
 
-# NOTES: This SQL command lists teams and coaches:
-# select teams.id, teams.name, coaches.d_name from teams inner join coaches on coaches.id=teams.coach_id;
 def get_all_teams(engine):
     team_list = []
     with Session(engine) as session:
@@ -257,3 +255,27 @@ def get_all_teams(engine):
                 ]
             )
     return team_list
+
+
+def add_tournament(engine, tour_csv):
+    tour_list = [str(i.lstrip()) or None for i in tour_csv.split(",")]
+    tour = models.Tournament(
+        name=tour_list[0],
+        bb_ver=tour_list[1],
+        mode=models.TourneyMode(tour_list[2]),
+        num_teams=tour_list[3],
+        num_rounds=tour_list[4],
+    )
+    with Session(engine) as session:
+        session.add(tour)
+        session.commit()
+
+
+def get_all_tournaments(engine):
+    tour_list = []
+    with Session(engine) as session:
+        stmt = select(models.Tournament)
+        result = session.execute(stmt)
+        for tour_obj in result.scalars():
+            tour_list.append(tour_obj)
+    return tour_list

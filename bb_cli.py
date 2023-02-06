@@ -116,6 +116,53 @@ def report_teams(filename: str = "bb.db"):
     console.print(table)
 
 
+@cli.command("add_tour")
+def add_tournament(tour_csv: str, filename: str = "bb.db"):
+    """
+    Command adds a tournament to the database.  The string required is
+    comprised of:
+    "<Tournament Name>, <BB Version (2 or 3)>, <Num Teams>, <Num Rounds>"
+    """
+    my_engine = engine.initialize_engine(filename)
+    engine.initialize_tables(my_engine)
+    engine.add_tournament(my_engine, tour_csv)
+
+
+@cli.command("report_tours")
+def report_tournaments(filename: str = "bb.db"):
+    """
+    Prints a table of the known tournaments in the database.
+    """
+    my_engine = engine.initialize_engine(filename)
+    engine.initialize_tables(my_engine)
+    rows = engine.get_all_tournaments(my_engine)
+    table = Table(title="Blood Bowl Tournament List", safe_box=True, box=box.ROUNDED)
+    table.add_column("Tour ID", justify="right", no_wrap=True)
+    table.add_column("Tournament Name", justify="right", no_wrap=True)
+    table.add_column("BB Ver", justify="right", no_wrap=True)
+    table.add_column("Style", justify="right", no_wrap=True)
+    table.add_column("Teams", justify="right", no_wrap=True)
+    table.add_column("Rounds", justify="right", no_wrap=True)
+    table.add_column("Status", justify="right", no_wrap=True)
+    table.add_column("Current", justify="right", no_wrap=True)
+    table.add_column("Last Updated", justify="right", no_wrap=True)
+    for row in rows:
+        print(row)
+        table.add_row(
+            str(row.id),
+            row.name,
+            str(row.bb_ver),
+            row.mode.value,
+            str(row.num_teams),
+            str(row.num_rounds),
+            row.state.value,
+            str(row.current_round),
+            str(row.time_updated),
+        )
+    console = Console()
+    console = print(table)
+
+
 @cli.command("test_method")
 def test_method(filename: str = "bb.db"):
     my_engine = engine.initialize_engine(filename)

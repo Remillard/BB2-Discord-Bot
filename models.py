@@ -114,15 +114,23 @@ class TourneyState(enum.Enum):
     COMPLETED = "Completed"
 
 
+class TourneyMode(enum.Enum):
+    KNOCKOUT = "Knock-Out"
+    RROBIN = "Round Robin"
+    SWISS = "Swiss"
+    LADDER = "Ladder"
+
+
 class Tournament(Base):
     __tablename__ = "tournaments"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
     bb_ver: Mapped[int] = mapped_column(Integer, nullable=False)
+    mode: Mapped[TourneyMode] = mapped_column()
     num_teams: Mapped[int] = mapped_column(Integer)
     num_rounds: Mapped[int] = mapped_column(Integer)
-    current_round: Mapped[int] = mapped_column(Integer)
-    state: Mapped[TourneyState]
+    current_round: Mapped[int] = mapped_column(Integer, default=0)
+    state: Mapped[TourneyState] = mapped_column(default=TourneyState.NOT_STARTED)
     active: Mapped[bool] = mapped_column(Boolean, default=True)
     time_created: Mapped[datetime.datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
@@ -146,7 +154,7 @@ class Game(Base):
     round_num: Mapped[int] = mapped_column(Integer)
     home_id: Mapped[int] = mapped_column(ForeignKey("tourneyteams.id"))
     visitor_id: Mapped[int] = mapped_column(ForeignKey("tourneyteams.id"))
-    gamestate: Mapped[GameState]
+    gamestate: Mapped[GameState] = mapped_column(default=GameState.UNPLAYED)
     home_score: Mapped[int] = mapped_column(Integer)
     visitor_score: Mapped[int] = mapped_column(Integer)
     time_created: Mapped[datetime.datetime] = mapped_column(
