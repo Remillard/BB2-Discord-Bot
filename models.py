@@ -1,7 +1,9 @@
 import enum
+import datetime
 from typing import List
 from typing import Optional
-from sqlalchemy import Integer, String, Boolean, Enum, ForeignKey
+from sqlalchemy import Integer, String, Boolean, Enum, ForeignKey, DateTime
+from sqlalchemy.sql import func
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
@@ -29,6 +31,13 @@ class Coach(Base):
     d_name: Mapped[str] = mapped_column(String, nullable=False)
     bb2_name: Mapped[Optional[str]] = mapped_column(String)
     bb3_name: Mapped[Optional[str]] = mapped_column(String)
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+    time_created: Mapped[datetime.datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    time_updated: Mapped[datetime.datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
     @classmethod
     def from_str(cls, coach_str):
@@ -43,8 +52,8 @@ class Coach(Base):
         :rtype: Coach()
         """
         # Splits the Coach string, removes whitespace, and converts nulls to None.
-        
-        coach_list = [str(i.lstrip()) or None for i in  coach_str.split(",")]
+
+        coach_list = [str(i.lstrip()) or None for i in coach_str.split(",")]
         return cls(d_name=coach_list[0], bb2_name=coach_list[1], bb3_name=coach_list[2])
 
     def __repr__(self) -> str:
@@ -58,7 +67,14 @@ class Team(Base):
     bb_ver: Mapped[int] = mapped_column(Integer, nullable=False)
     coach_id: Mapped[int] = mapped_column(ForeignKey("coaches.id"))
     race_id: Mapped[int] = mapped_column(ForeignKey("races.id"))
-    
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+    time_created: Mapped[datetime.datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    time_updated: Mapped[datetime.datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
     @classmethod
     def from_str(cls, team_str):
         """
@@ -74,8 +90,13 @@ class Team(Base):
 
         """
         # Splits the Team string, removes whitespace, and converts nulls to None object.
-        team_list = [str(i.lstrip()) or None for i in  team_str.split(",")]
-        return cls(name=team_list[0], bb_ver=team_list[1], coach_id=team_list[2], race_id=team_list[3])
+        team_list = [str(i.lstrip()) or None for i in team_str.split(",")]
+        return cls(
+            name=team_list[0],
+            bb_ver=team_list[1],
+            coach_id=team_list[2],
+            race_id=team_list[3],
+        )
 
     def __repr__(self) -> str:
         return f"Team(id={self.id}, name={self.name}, coach_id={self.coach_id}, race_id={self.race_id})"
@@ -102,6 +123,13 @@ class Tournament(Base):
     num_rounds: Mapped[int] = mapped_column(Integer)
     current_round: Mapped[int] = mapped_column(Integer)
     state: Mapped[TourneyState]
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+    time_created: Mapped[datetime.datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    time_updated: Mapped[datetime.datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
 
 class TourneyTeam(Base):
@@ -121,3 +149,9 @@ class Game(Base):
     gamestate: Mapped[GameState]
     home_score: Mapped[int] = mapped_column(Integer)
     visitor_score: Mapped[int] = mapped_column(Integer)
+    time_created: Mapped[datetime.datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    time_updated: Mapped[datetime.datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )

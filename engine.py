@@ -50,11 +50,19 @@ def add_coach(engine, coach_csv):
     :param str coach_csv: A string with comma separated values for the three
                           fields.
     """
+    # Convert from the CSV variation
+    coach_list = [str(i.lstrip()) or None for i in coach_csv.split(",")]
     # Determine first if the coach may already exist in the database.
-    this_coach = models.Coach.from_str(coach_csv)
-    if find_coach(engine, this_coach.d_name, fuzzy=False) is None:
+    try:
+        find_coach(engine, coach_list[0], fuzzy=0)
+    except KeyError:
+        # If it's not found then it's okay to add the coach to the database.
+        coach = models.Coach()
+        coach.d_name = coach_list[0]
+        coach.bb2_name = coach_list[1]
+        coach.bb3_name = coach_list[2]
         with Session(engine) as session:
-            session.add(this_coach)
+            session.add(coach)
             session.commit()
     else:
         print(
