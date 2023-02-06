@@ -62,7 +62,7 @@ def add_coach(engine, coach_csv):
         )
 
 
-def find_coach(engine, d_name, fuzzy=True):
+def find_coach(engine, d_name, fuzzy=1):
     """
     Receives the engine and a possible Discord name.  The method will first
     assume that the name is exact and will search for it and return the first
@@ -75,47 +75,59 @@ def find_coach(engine, d_name, fuzzy=True):
 
     :param engine: An object from SQLAlchemy create_engine method.
     :param str d_name: The Discord name of a coach.
-    :param bool fuzzy: A boolean that represents whether fuzzy finding is accepted.
+    :param int fuzzy: An integer controlling fuzzy finding and when exceptions
+                      are raised.  Default = 1, closest match with no interaction.
+                      0 = Exact Match Only.
+                      1 = Only one match permitted (no interaction with user)
+                      2 = Multiple matches permitted, asks user for input.
     :return: A tuple containing a Coach object as its only member.
     """
     with Session(engine) as session:
+        # Exact match statement
+        # The Result.all() is a list of tuples.  Each tuple contains one table
+        # object.  This is important for the referencing below because it's
+        # fucking maddening.  We return the tuple.
         stmt = select(models.Coach).where(models.Coach.d_name == d_name)
-        coach = session.execute(stmt).first()
-        if not fuzzy:
-            return coach
-        else:
-            if coach is not None:
-                print("[green]Found exact coach match![/]")
-                return coach
-            else:
-                print("[bold red]Exact match failed.  Trying fuzzy match.[/]")
-                stmt = select(models.Coach).where(
-                    models.Coach.d_name.like(f"%{d_name}%")
+        coaches = session.execute(stmt).all()
+        # Under every circumstance, if the exact match works, we use that one
+        # with no further thought.
+        if coaches is not None and len(coaches) == 1:
+            print("[green]Found exact coach match![/]")
+            return coaches[0]
+        elif fuzzy == 0:
+            # Exact match failed at this point.  If we've only permitted exact
+            # (fuzzy = 0) then we raise exception here.  Otherwise we continue with
+            # a fuzzy search.
+            raise KeyError(f'Could not find the coach name string: "{d_name}".')
+        elif fuzzy in [1, 2]:
+            # Wildcard variation.
+            print("[bold red]Exact match failed.  Trying fuzzy match.[/]")
+            stmt = select(models.Coach).where(models.Coach.d_name.like(f"%{d_name}%"))
+            coaches = session.execute(stmt).all()
+            # Under fuzzy circumstances, if we've found exactly one fuzzy match,
+            # we use that one with no further thought.
+            if coaches is not None and len(coaches) == 1:
+                print(
+                    f"[green]{len(coaches)} record matches.  Using {coaches[0][0].d_name}.[/]"
                 )
-                # The coaches result is a list of tuples.  Each tuple contains one table
-                # object.  This is important for the referencing below because it's
-                # fucking maddening.  We return the tuple.
-                coaches = session.execute(stmt).all()
-                if coaches is None:
-                    raise KeyError(f'Could not find the coach name string: "{d_name}".')
-                elif len(coaches) == 1:
-                    print(
-                        f"[green]{len(coaches)} record matches.  Using {coaches[0][0].d_name}.[/]"
-                    )
-                    return coaches[0]
+                return coaches[0]
+            elif fuzzy == 1:
+                # Exactly one fuzzy match failed, so we raise exception.
+                raise KeyError(f'Could not find the coach name string: "{d_name}".')
+            elif fuzzy == 2 and coaches is not None:
+                # Multiple matches permitted, user queried for exact.
+                print(f"[bold red]{len(coaches)} records match.[/]")
+                for row in coaches:
+                    if Confirm.ask(f"[cyan]Select {row[0].d_name}?", default=False):
+                        print(f"[green]Using {row[0].d_name}.")
+                        return row
                 else:
-                    print(f"[bold red]{len(coaches)} records match.[/]")
-                    for row in coaches:
-                        if Confirm.ask(f"[cyan]Select {row[0].d_name}?", default=False):
-                            print(f"[green]Using {row[0].d_name}.")
-                            return row
-                    else:
-                        raise KeyError(
-                            f'Could not find the coach name string "{d_name}".'
-                        )
+                    raise KeyError(f'Could not find the coach name string "{d_name}".')
+        else:
+            raise KeyError(f'Could not find the coach name string: "{d_name}".')
 
 
-def find_race(engine, r_name, fuzzy=True):
+def find_race(engine, r_name, fuzzy=1):
     """
     Receives the engine and a possible racial name along with a boolean that
     sets whether or not the fuzzy finding method is used.  The method will first
@@ -127,42 +139,58 @@ def find_race(engine, r_name, fuzzy=True):
 
     :param engine: An object from SQLAlchemy create_engine method.
     :param str race: The name of the team race.
+    :param int fuzzy: An integer controlling fuzzy finding and when exceptions
+                      are raised.  Default = 1, closest match with no interaction.
+                      0 = Exact Match Only.
+                      1 = Only one match permitted (no interaction with user)
+                      2 = Multiple matches permitted, asks user for input.
     :return: A SQLAlchemy Result object.
 
     """
     with Session(engine) as session:
+        # Exact match statement The Result.all() is a list of tuples.  Each
+        # tuple contains one table object.  We return the tuple.
         stmt = select(models.Race).where(models.Race.name == r_name)
-        race = session.execute(stmt).first()
-        if not fuzzy:
-            return race
-        else:
-            if race is not None:
-                print("[green]Found exact race match![/]")
-                return race
-            else:
-                print("[bold red]Exact match failed.  Trying fuzzy match.[/]")
-                stmt = select(models.Race).where(models.Race.name.like(f"%{r_name}%"))
-                races = session.execute(stmt).all()
-                if races is None:
-                    raise KeyError(f'Could not find the race name string: "{r_name}".')
-                elif len(races) == 1:
-                    print(
-                        f"[green]{len(races)} record matches.  Using {races[0][0].name}.[/]"
-                    )
-                    return races[0]
+        races = session.execute(stmt).all()
+        # Under every circumstance, if the exact match works, we use that one
+        # with no further thought.
+        if races is not None and len(races) == 1:
+            print("[green]Found exact race match![/]")
+            return races[0]
+        elif fuzzy == 0:
+            # Exact match failed at this point.  If we've only permitted exact
+            # (fuzzy = 0) then we raise exception here.  Otherwise we continue with
+            # a fuzzy search.
+            raise KeyError(f'Could not find the race name string: "{r_name}".')
+        elif fuzzy in [1, 2]:
+            # Wildcard variation.
+            print("[bold red]Exact match failed.  Trying fuzzy match.[/]")
+            stmt = select(models.Race).where(models.Race.name.like(f"%{r_name}%"))
+            races = session.execute(stmt).all()
+            # Under fuzzy circumstances, if we've found exactly one fuzzy match,
+            # we use that one with no further thought.
+            if races is not None and len(races) == 1:
+                print(
+                    f"[green]{len(races)} record matches.  Using {races[0][0].name}.[/]"
+                )
+                return races[0]
+            elif fuzzy == 1:
+                # Exactly one fuzzy match failed, so we raise exception.
+                raise KeyError(f'Could not find the race name string: "{r_name}".')
+            elif fuzzy == 2 and races is not None:
+                # Multiple matches found and permitted.  User queried.
+                print(f"[bold red]{len(races)} record matches.[/]")
+                for row in races:
+                    if Confirm.ask(f"[cyan]Select {row[0].name}?", default=False):
+                        print(f"[green]Using {row[0].name}.")
+                        return row
                 else:
-                    print(f"[bold red]{len(races)} record matches.[/]")
-                    for row in races:
-                        if Confirm.ask(f"[cyan]Select {row[0].name}?", default=False):
-                            print(f"[green]Using {row[0].name}.")
-                            return row
-                    else:
-                        raise KeyError(
-                            f'Could not find the race name string "{r_name}".'
-                        )
+                    raise KeyError(f'Could not find the race name string "{r_name}".')
+            else:
+                raise KeyError(f'Could not find the race name string: "{r_name}".')
 
 
-def add_team(engine, team_csv):
+def add_team(engine, team_csv, fuzzy=1):
     """
     Receives the engine and a CSV string of coach Discord Name, Team Name,
     Race, and Game Version and creates a record in the Team table.
@@ -172,15 +200,19 @@ def add_team(engine, team_csv):
     :param str team_str: A string with comma separated values for the fields.
     """
     team_list = [str(i.lstrip()) or None for i in team_csv.split(",")]
-    coach = find_coach(engine, team_list[0])
-    race = find_race(engine, team_list[2])
-    if coach is not None and race is not None:
-        team = models.Team(name=team_list[1], bb_ver=team_list[3], coach_id=coach[0].id, race_id=race[0].id)
-        with Session(engine) as session:
-            session.add(team)
-            session.commit()
-    else:
-        print("Team information invalid.")
+    coach = find_coach(engine, team_list[0], fuzzy)
+    race = find_race(engine, team_list[2], fuzzy)
+    # Each of the finds will raise exception if nothing found, so we don't
+    # really have to check for None at this point.
+    team = models.Team(
+        name=team_list[1],
+        bb_ver=team_list[3],
+        coach_id=coach[0].id,
+        race_id=race[0].id,
+    )
+    with Session(engine) as session:
+        session.add(team)
+        session.commit()
 
 
 def get_all_coaches(engine):
@@ -208,6 +240,12 @@ def get_all_teams(engine):
         result = session.execute(stmt)
         for obj in result:
             team_list.append(
-                [obj.Team.id, obj.Team.name, obj.Race.name, obj.Team.bb_ver, obj.Coach.d_name]
+                [
+                    obj.Team.id,
+                    obj.Team.name,
+                    obj.Race.name,
+                    obj.Team.bb_ver,
+                    obj.Coach.d_name,
+                ]
             )
     return team_list

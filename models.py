@@ -20,7 +20,7 @@ class Race(Base):
     bb3: Mapped[bool] = mapped_column(Boolean)
 
     def __repr__(self) -> str:
-        return f"Row ID: {self.id}, Race name: {self.name}, In BB2?: {self.bb2}, In BB3?: {self.bb3}"
+        return f"Race(id={self.id}, name={self.name}, bb2={self.bb2}, bb3={self.bb3})"
 
 
 class Coach(Base):
